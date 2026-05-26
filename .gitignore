@@ -58,9 +58,11 @@ venv/
 .venv/
 env/
 ENV/
+.runtime_deps/
 **/venv/
 **/env/
 **/.venv/
+**/.runtime_deps/
 *venv*/
 *env*/
 pip-log.txt

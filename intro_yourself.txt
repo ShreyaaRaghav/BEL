@@ -1,0 +1,175 @@
+Introduce Yourself?
+Ans: “Good afternoon, I’m Shreya. I’m a second-year BTech CSE (AI) student. My interests are mainly in NLP, data analytics, and building end-to-end ML systems — not just models in notebooks, but usable platforms.
+I usually start by understanding the problem constraints and trade-offs before choosing techniques. My projects span semantic NLP, telemetry-based analytics, and applied data systems, and I feel this way of thinking aligns well with an SDE role at an early-stage startup
+Or: I feel this way of thinking aligns well with an AI role at an early-stage startup like yours
+
+
+Q) How can u help us with AI proj here?
+ANS: That is a fair ask. Mu profile does have strong ML foundations BUT I work closer to applied AI systems than to Model traning. Most of my projects focus on how intelligence is integrated into real prodcuts not just traning models. I look into paramenters, constriants, system behaviour, descion logic and failures nOT just ML models.
+
+FOR EG: VERBAITM project of mine deliberately avoided gen AI because the PS demanded predictability and safety. Hence deterministic NLP pipelines with rule based logic was used. THIS IS VERY SIMILAR TO HOW AI is used in as a toole and authomation rather than ML research.
+
+So while my base is ML, my strength is actually in engineering AI into systems — understanding when to use intelligence, when not to, and how to make it reliable..which I think aligns well with ur work.
+
+
+Q) WHAT IS AI? What according to u AI engineer does?
+ANS) AI enables machines to stimulate human intelligence and perform tasks that originally were done manually by humans. The tasks donest have to be explicitly programmed, it is automated as AI systems can identify, learn, reason, decide and understand. In your case, it’s augmenting performance testing rather than training models.”
+
+An AI engineer understands, builds, deploys and designs AI systems and feature them in different tools. The do so by training ML models, integrating AI in softwares and ensuring tasks are done augmently, and solutions/results are generated accuractely. They are also responsible for debugging any errors or issues and further optimizing AI implementation to its best possible version.
+
+Tell about a project?
+Ans: One project I’m proud of is Contexto — a semantic word-guessing platform. Unlike Wordle-style games that rely on spelling, this evaluates guesses based on semantic similarity using cosine distance.
+I initially used a fast, static embedding model, which worked technically but felt semantically rigid. For example, it failed to capture multiple meanings of words like ‘bank’. I then explored Sentence-BERT, which was slower but much more context-aware.
+Instead of discarding the first model, I calibrated both and presented them side-by-side so users could see the trade-offs. The real challenge wasn’t making the models work — it was aligning model output with human intuition and syncing frontend feedback with backend logic.
+That project taught me that ML systems don’t fail because of models — they fail because of UX, assumptions, and integration.
+“One issue I faced was session handling when users gave up mid-game. Improper DOM scoping and async behavior caused frontend inconsistencies. Debugging that forced me to truly understand how async logic and frontend-backend synchronization works in real systems.”
+
+
+Q: “What would you improve next?”
+Ans: I haven’t implemented the hints feature in my Platform yet. I personally like keeping Future Works so I revisit and refresh my codes reguraly. So, I am yet to implement that. I would like to make the threshold more dynamic and more adjusting to edgecases. Further, I would like to scale my platform to a proper industry grade website.
+
+
+Q:”What are ur weaknesses and strengths”
+Ans: “I would consider my ability to work and prosper in team as one of my strongest strengths. I love to collaborate and work with other people. I find other’s opnions educational and brainstorming as a unit to solve a problem handed over… is something I look forward to in workplace. I am a think-before-u-do type preson so I brainstorm the idea first, rather than backtrace it all when things fall. I like exploring all options and choosing the best one even if it takes more time as an accurate model is the final product…not a patched up one.
+One thing I’m actively improving is not over-optimizing early — I used to spend too much time smoothing details. But as I have proccided with my technical journey and am doing more projects I am working on it and now I can clearly state where my priority lies.”
+
+
+Q:”Why are u unique?”
+Ans:”I think before I type. I, till now have came up with my own Ideas of projects. And I don’t see them as ideas, I see them as problems to reason with. And I search about it and brainstorm the problems solutions before I start with the coding part. Me NOT using classifier-ML for the telemetry analysis project supports how I don’t chase black-box solns in name of convenience but also make sure they aren’t redundant when compared to any other way of solution. But whenever AI is valid…I use them cautiously and truly.
+My projects aren’t just…products. They are my insights. I would like to state my project Verbaitm here: LLM would have made it…simple, clean. But also case based unusable. Sensitive texts like medical files, beaurocratice notices and law based notices…LLMs were actually dangerous. From hallunciation to user-favourism to community guidelines, it all just proved how LLMs wasn’t the most optimal stack here. SO I chose NLP- And it turned out to be more reliable, safe and accurate.
+As an employee, I possess great team-cordination and love to work in skilled teams. Different and preciptives are refreshing and I am most optimal brainstorming a solution with a team.”
+
+
+Q. Why to hire you?
+Ans: “I had looked into the startups’ concept before I applied. I was interested in your startup because detecting vulnerabilities at the design or pre-production stage aligns strongly with how I approach problems. My projects often focus on identifying risk points and insighting on performance issues early rather than patching issues later.
+That mindset, combined with my experience building and debugging end-to-end systems, makes me excited to contribute in a fast-moving startup environment. You aren’t building ML models from scratch, You are augmenting engineering using AI in terms of testing and risk-detection. I am excited to implement AI ethically and needfully the way you are and current tools like Apache JMeter is inadequate.”
+
+
+Q.whay is a LLM agent?
+Ans: its an AI system to autonomously reason, decide and execute complex tasks using memory and logic. Basic Loop includes: Receive task, featch context wrt task, decide action tot ake, call tool to aid, observe result, if fine? Repeat until all done and accurate.
+If I were to put this implement my definition in on your team’s objective…for performance testing LLM AGENT would read manual/context wrt the product , pull files needed to analyse its working , analyse its content, flag risky known patterns noticed in there, run tests and error-checkers, output the report and risk. 
+LLM means Large Language Model, alone its just a AI-featured text generator, LLM AGENT is a desion maker, a end to end system that takes input, processes it, decides, and gives needed report.
+
+
+Q. Add domain knowledge to LLM
+Ans: Domain knowledge is intregal to LLM to optimize it into smtg more usefull. There are mainly 2 ways:
+1) fine tune: modify model weights and train behaviour patterns such that the overall AGENT is more efficient with its work. But they are often, time taking and risky.
+2) RAG: it stands for Retirval Augmented Genration. I haven’t worked with it yet but it imporves LLMs accuracy by retirving trusted uptodate information to answer queries rather than just letting LLM rely on pre trained memory.
+Given error-detection use cases, I’d prefer RAG because it allows traceability and easy updates.
+
+
+Q. “When would you use Redis instead of Postgres?”
+Ans: Both are storing features. Redis is in-momory storage, cache and msg broker. Postgres is DBS and database oriented. So for fast, flexible, session-based storage? Redis is more optimal as data is in memory, hence more configurable and high speed. Postgres is used when the demand is of durablility and data integrity…as it writes data into disk directly.
+
+
+Q. What do you do when something breaks?
+Ans: First I would make a note of the breaking. Documentation of the erros is useful For future ease and also learning. Mistakes teaches one most effectively. Then I would isolate the bugged-layer. And try to reason with where and how my logic failed. I would run test cases and some tweaks to see its state then. Make assumptions and reduce scope. If nothing works I would zoom out into the whole framework and try to find the issue at it whole as most things breaks because relational setup was faulty.”
+Here I would like to mention a niche issue I faced in my Unified Ml website project, which is an ongoing learning website of 6+ type of Ml models with clear display of results using industry-standard datasets and reasoning. In Simple logistical resoning section. I had not standard_scaled my x_train. That made the prediction so edge cased that probibality that wasn’t a solid 0 was a 1. That had to be fit_transformed. I got to know fo the bug by checking to intercept and coefficents that were approx. 0 hence showing no relation to the relavent column, which was sign of error in code.”
+
+
+Q. How would you design a simple AI-powered dashboard?
+Ans: I have never had first hand experice of making one but I can think of a roadmap to make one that I would like to voice it out…We start with storage, database stores the findings and all memory related informational data. Cache implemeneted to reduce speed of scan and initialize immedicate lookup in its table whenever needed. AI AGENT (possibliy LLM AGENT) would be used to analyse code and make decisions on it. Backend would have APIs and Authentication. Frontend would show risk, analysis all done using graphs and plots with clear labels and a user fireidnly UI interface.
+
+
+Q) DIFF BETWEEN SYNC and ASYNC coding:
+ANS) sync executes one task after the other blocking further executon till that current task is finished. Making the system simple but slow. Async runs tasks concurrently and one alongside the other without blocking any tasks, it is complext but speed efficient.
+
+Q) APISANS) Application programming interfaces allowes software programs to to communicate with each other and share data or functionality. It acts as a middleman to facilitale interactions on need to know bases.
+
+I haven’t worked with APIS much but I have implemented Text TO Speed google cloud API and Translational google Cloud API to my deterministic text simplification project Verbaitm.
+
+
+Q. And questions for us?
+Ans: “I would like to ask a question, I was curious while I was scrolling through tur estemmed startups…motive. Security Check on pre-produced technical products. I would like to ask HOW you came up with such a novel proposal?”
+OR: AI automated preformace tester and bug-checker on pre produced technical products.
+
+And other 
+:”What is the reporting and feedback system in your company for interns?”“thank you that would be all for now.”
+
+
+Q) “What does ‘we don’t work on ML’ mean to you?
+ANS) I interpret your statement with functionality. I scrolled through Your company’s purpose, ML for performance testing or error-detection would simply be inefficient. Hence AI is needed, Simple rule based logic would be possible solution, But not Efficient. A tool of such manual testing exists…But it takes hours. Running tests statemeents, marking errors and risk cannot be sufficed by a training model, it needs descison making AI as a tool, it needs a AGENT. So your statement resonates with the need to Augmented featured AI tool for a looped system to serve your purpose.
+
+
+Q) “How would you integrate AI into a JMeter workflow?”
+ANS) TO make JMETER an optimal solution to our motive…AI needs to be integrated to auto test-case the pre-producted product, parameter suggestion, metrics optimization, redundancy removal, anomaly detection, summazrising tests results, accuracy and risk calculation and much more.
+
+
+q) “Tell me about a bug you struggled with.”
+ANS) One of my struggle with debugging was in my Contexto project. In contexto logic I started with using Spacy glOve embeddings for sematic similarity and finding closness %. But the accuracy achieved in the similarities and Error margin wasn’t optimal. But, spacy is fast and lightweight. So I tuned it into more considerate model which resonated to how brain funtions. Using sigmoid, it maked the cosine values achieved more… Humane accuracy. I fine tuned its paramenters so that the accuracy achieved were Better than I expected and errors reduced noticeably. The bug here wasn’t a coding issue rather a optimization issue, the issue here was accuracy and not giving half baked functional products but best improved version.
+
+
+Q) How would you explain performance testing to a non-tech founder?”
+ANS) performace testing is products assessment. How much load can it handle, if that exceeds then what it does? How much work stress can it handle? If it gets more interaction then what happens? What are the edgecases and bottlenecks of the product? Where it the product is best-of-use and where is the product slightly weak. How user experience is with it? How are these results over a span of time? 
+
+
+Q) What does scalability mean in an AI system?”
+ANS)  Ability to handle more workload, datasets, UI interaction, users request without compromising performance, speed or accuracy. It means to make the AI system such that the infrastructure and algorithms can grow and meet the demand efficiently while being reliable and accurate.
+
+Q) what does paramenters, constrain and metrics mean?
+ANS) Paramenter is a value or setting that defines the behaviour of a model. For eample the weight of a model that can be adjusted for optimized accuracy
+Constrinat: It is the limitation, restriction or rule that has to be satisfied for a solution to be valid. The are the minimum of hat has to be satisfied.
+Metrics: qualitative measures to measure effectivelness, performance or quality of system. When constriants are met? Metrics monitor how well the system is performing. Eg: R2_score, accuracy %
+
+
+Q) Simple AI feature end to end?imput of data -> processing of it with the pre trained rules and checking constriants and setting paramenters -> Implementing AI to analyse algorithms and take decision based on the data present -> Validation check on the output and metric optimization – returning the output to the UI.
+
+Q) “What part of AI engineering excites you?”
+ANS) AI development excites me the most as it pushes me to understand AI, to explore what it truly means to make a machine…be like a human. Its not just about creating tools or following stated manuals BUT about understanding ourselves better – outthinking, intelligence and creativity.  Also it’s a currently technically advancing field hence I learn something new regulary and that makes me more intrudged by it. AI engineering also pays regards to ethical and mindful use of AI and how to stray away from black-box AI solutions.
+
+
+Q) “How comfortable are you with React?”
+ANS) I haven’t worked with react.js first hand, but I know it is for building interactive UI’s for webistes and apps. IT allows developers to create complex, fast, scalable  UIs using the principle of reusability. Even know my exposure isn’t MUCH but I’ve worked with frontend-backend integration, I would love to be learn it along the way and am keen to be comfortable with it when onboard with your team.
+
+
+ANS) List is linear in nature that stores integers between sqr brackets where sequential data is needed. Dictorary consists of keys and values where keys must be unique and are used to access, they are defined between curly brackets with key and its corresponding value, USED FOR fast lookups and direct access.
+
+
+Q) “How would frontend and backend talk in your system?”
+ANS) They communicate via HTTP request protocols like GET POST etc, where backend exposes endpoints that frontend calls to exchange JSON data. JSON is a parasable lightweight language that helps communaction between frontend and backend.
+(backend end point means URL that bridges between database logic and frontend commands)
+
+FLOW: User interacts with the UI -> frontend sends a JSON request to backend endpoint -> backend process it, retireves\update needed data from database -> it sends response back to frontend in JSON format -> frontend updates the UI accordingly
+
+
+Q) What sur experience with python?
+ANS) I have experience working with Python for data science and NLP projects.I have used libraries like NumPy and Pandas for data handling.I use Matplotlib and Seaborn for data visualization.I have worked with Scikit-learn for basic machine learning tasks.I have also done web development using Python with Flask.
+
+
+Q) How would you log and monitor an AI system?
+ANS) IT requires tracking the data, model performance and operational metrics to detect and diagnose issues found. Further log inputs, outputs and data-changed for tracebility and monitor results like confidence, cost, safety checks.
+
+
+
+MORE:
+  “Something works locally but not in production — what do you do?”
+  “The model accuracy suddenly drops — what do you check?”
+  “The API is slow — where do you look?”
+  “How would you design a simple dashboard?”
+  “How would you store user data?”
+  “How would you make it faster?”
+What is prompt engineering?
+They might ask:
+What is cosine similarity?
+Why did you use Flask?
+Why not Django?
+What is an embedding?
+What is preprocessing?
+Why scaling matters in ML (you already covered this 🔥)
+
+  What’s the difference between a list and a dictionary?
+  When would you use an API vs a background job?
+  What happens when two users hit the same endpoint?
+  What is a REST API?
+  What is HTTP status code 200 / 400 / 500?
+  What is JSON and why is it used?
+
+
+
+“I’m not fully acquainted with that term yet. Could you please rephrase the question or give a simpler framing so I can reason it through?”
+
+“I haven’t encountered that directly yet.”
+
+I plan by work around pre-informed deadlines and I am used to managing projects and courseworks so I lay my priorities based on urency and impact.  During exam weeks I usually plan ahead or would communicaye accordingly o time of timelines need minor adjustments.
+
+

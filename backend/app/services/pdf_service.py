@@ -2,10 +2,22 @@ import os
 
 try:
     import fitz  # PyMuPDF
+    if not hasattr(fitz, "open"):
+        import pymupdf as fitz
     FITZ_AVAILABLE = True
 except ImportError:
-    FITZ_AVAILABLE = False
-    print("WARNING: PyMuPDF (fitz) is not installed. PDF text extraction will run in fallback mock mode.")
+    try:
+        import pymupdf as fitz
+        FITZ_AVAILABLE = True
+    except ImportError:
+        FITZ_AVAILABLE = False
+        print("WARNING: PyMuPDF is not installed. PDF text extraction will run in fallback mock mode.")
+
+try:
+    from pypdf import PdfReader
+    PYPDF_AVAILABLE = True
+except ImportError:
+    PYPDF_AVAILABLE = False
 
 def extract_text_from_pdf(file_path: str) -> str:
     """
@@ -25,8 +37,14 @@ def extract_text_from_pdf(file_path: str) -> str:
             return full_text.strip()
         except Exception as e:
             print(f"Error during PDF extraction with PyMuPDF: {e}")
-            return f"[Error extracting text: {e}]"
-    else:
-        # Fallback if fitz is not installed
-        filename = os.path.basename(file_path)
-        return f"[Fallback text for {filename} - PyMuPDF not available]"
+
+    if PYPDF_AVAILABLE:
+        try:
+            reader = PdfReader(file_path)
+            full_text = "\n".join(page.extract_text() or "" for page in reader.pages)
+            return full_text.strip()
+        except Exception as e:
+            print(f"Error during PDF extraction with pypdf: {e}")
+
+    filename = os.path.basename(file_path)
+    return f"[Fallback text for {filename} - PDF text extraction not available]"

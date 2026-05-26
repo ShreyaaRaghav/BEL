@@ -1,0 +1,82 @@
+Telemetry Intent Over Prediction
+
+Race Telemetry Interpretation ProjectAnalysed F1 telemetry of 2024 Australia GP’s Norris(NOR) first stint (14 laps) on Mediums using FastF1 API with a snapshot-based, deterministic approach to interpret driver intent, braking behaviour, corner execution and much more without machine learning.
+
+
+Why No Machine Learning or Generative AI Was Used.
+
+This Project intentionally avoids Machine Learning or Generative AI because Telemetry analysis isn’t a prediction problem first, it is a trust, interpretation and signal-understanding type. Racing Telemetry is raw, edge-cased, high frequency, grounded data where meaning is rendered from context like: braking points, throttle modulation, gear transitions, spatial racing lines, etc. Applying ML without first establishing factual understanding risks producing outputs that are detached from the underlying driving reality.
+More importantly, this project is designed to demonstrate analyst intent, not model capability. Every transformation, aggregation, and visualization here is explainable, reversible, and traceable to a real on-track behaviour. 
+In environments like motorsport, finance, or safety-critical systems, this clarity is often more valuable than automation. A clean, well-reasoned data analysis built with purpose outperforms black-box intelligence when accountability, insight, and decision-making are the end goals.
+Track derived from X Y coordinates of Telemetry Data for reference.Track derived from X Y coordinates of Telemetry Data for reference.
+Track derived from X Y coordinates of Telemetry Data for reference.
+Track derived from X Y coordinates of Telemetry Data for reference.
+INDEX
+
+Lap Timing
+Throttle / Brake
+Motion & Forces
+Gear & Control
+Race State
+Longest Time Span
+Peak Throttle Point
+Max Deceleration Point
+Largest Gear Drop
+Farthest Gap Ahead
+Shortest Time Span
+Lowest Throttle Use
+Peak Acceleration Point
+Largest Gear Upshift
+Max TB Overlap Point
+Highest Speed Point
+Sharpest Brake Input
+Highest Jerk Event
+—
+Peak Engine Load
+
+
+Format
+Context -> interpretation -> conclusion
+
+
+1. Longest Time Span:
+Context: 
+The longest Lap Span with respect to time was in the1st lap out of 14 when the session time being 82.561. The Time Span (time taken for covering a span of distance) was 1.1 seconds whereas the previous span lasted around 0.072seconds showing an evident difference of ~1 second. A minute speed delta of ~6 m/s has been recorded with Gear and Throttle modulation being 0. A sudden increase in Distance to the Driver ahead has been noted at 14th lap with an increase from 48.01 to 60.85. 
+No brakes were applied and DRS had been enabled. Extremely High Jerk of -171.819 m/s^3 have been observed in previous span had returned to absolute normal ~ 0 in this span (braking in previous span had also been FALSE). A sharp transfer in Engine Load from previous 925796.5 was relieved down to to 694133.5 in this span. Coordinates: X=2540 Y=-4451
+Interpretation:
+Lap 1 is always traffic-dense with cold medium tyres, resulting in defensive and constrained driving by the driver. Speed remained largely constant with minimal throttle modulation and stable gear selection, indicating a controlled lift-and-hold behaviour. The observed increase in distance to the driver ahead and the high-magnitude negative jerk are clear signals of a lift-off responses to traffic progression or non-uniform pace from the car ahead. 
+This acceleration state change explains the engine load relief observed without corresponding braking input. Elevated jerk during lift phases can momentarily reduce traction efficiency, requiring additional time in the subsequent (this) span to recover momentum and position loss. This makes the longer duration plausible despite DRS being active and the absence of braking or any other error.
+Conclusion:
+The longest time span (~1.1 s) is best explained by traffic-induced lift behavior on Lap 1 rather than driver inefficiency or braking loss.
+
+
+2. Shortest Time Span:
+Context:
+The Shortest Lap Span with respect to time was in the 7th lap out of 14 when the session time being 82.744. The Time Span (time taken for covering a span of distance) was 0.006 seconds whereas the previous span lasted around 0.071 seconds showing an evident difference of ~0.065 seconds. A minute speed delta of ~0.05m/s has been recorded with Gear and Throttle modulation being 0. The Distance from the Driver ahead has been constant but had closed by -14 delta by the next lap. Increase in acceleration has been noted to be ~4.3 m/s^2. and dropping to strict 0 by the next lap span.
+The distance covered on calculation is ~0.4m which is significantly lower than the average distances of other spans that last around 5-15 meters. This span is exactly the last stretch before commerce of the 8th lap. No brakes were applied and DRS has not been enabled. Extremely High Jerk of 55.1061 m/s^3 have been observed in this span and it had returned to absolute normal ~ 0 in the next span (braking in previous span had also been FALSE). The stress on Engine Load from had been constant in this span. Coordinates: X=-1179.54 Y=--1346.68
+Interpretation:
+This Span seems to be an edge case generated when an abnormally small distance stretch of ~0.4 m is taken which is an anomaly to the mean value. Speed remained largely constant with minimal throttle modulation and stable gear selection. No stress on the Engine has been detected. Extreme value of jerk is due to its mathematical formula: acceleration of car / time taken. As the time taken was nanoseconds and distance covered minute so the jerk calculation was inflated. 
+Conclusion:
+The unusually low time span is attributed to a very short distance segment near the lap boundary, leading to inflated derivative metrics such as jerk due to reduced temporal resolution rather than any physical anomaly.
+
+
+3. Highest Speed Point:
+Context:
+The Highest Speed Span with respect to time was in the 4th lap out of 14 when the session time being 44.95. The highest speed noted was 324km/hr which lasted around 0.2 seconds showing a difference of ~0.2 seconds with the past lap. A minute speed delta of ~1 m/s has been recorded which is abnormal with respect to interpolation average ~0.45 m/s with Gear and Throttle modulation being 0. Acceleration jump had been noticed from 0 to 1.4m/s^2 in this span. 
+No brakes were applied and DRS had been enabled. Jerk of 7 m/s^3 have been observed in previous span had returned to absolute normal ~ 0 in this span (braking in previous span had also been FALSE). No change in Engine Load has been observed in this span. Coordinates: X=710.75 Y=2851
+Interpretation:
+The combination of maximum recorded speed (324 km/h), zero throttle modulation, stable gear state, and absence of braking indicates the car was already fully settled in its top-speed state. The enabled DRS confirms the high speed was due designated high-speed zone were aerodynamic drag reduction, rather than driver input, governed velocity.
+This span represents a peak straight-line velocity phase rather than an active extreme acceleration or braking event. The normalization of jerk values and the unchanged engine load further reinforce that this was a mechanically stable phase, with no abrupt driver input or load transfer.
+Conclusion:
+The highest speed attained was a result of Active DRS and straight-line velocity. This point reflects optimal aerodynamic efficiency and momentum carry rather than aggressive driving hence reasoning the highest attained speed.
+
+
+4. Peak Throttle Point:
+Context:
+The peek Throttle Point with respect to time was in the 1st lap out of 14 when the session time being 44.42. The Speed had been constant with a speed delta of 0.045 m/s. The time taken to cover this stretch was 0.009 which is abnormal to the average interpolation being approximately 0.15. The Gear modulation was 0 with jerk being ~0. Throttle reached peak 100% in this span. Acceleration jumped from this span 1.38 m/s^2 to 2.78 m/s^2 in next stretch showing a noticeable difference of ~1.35.
+No brakes were applied and DRS had been enabled. Jerk of 7 m/s^3 have been observed in previous span had returned to absolute normal ~ 0 in this span (braking in previous span had also been FALSE). No change in Engine Load has been observed in this span. Coordinates: X=1121.02 Y=8968.75
+Interpretation:
+The peak throttle occurs while the car is stable in Lap 1 and speed is constant with consistent speed delta. Since there’s no gear modulation or braking event, the car is already optimal. The fact that engine load and jerk stay flat shows this was a smooth, steady application of the pedal rather than a sudden snap or aggressive hit showcasing the driver’s racing ability.
+The 0.009s duration is short that it likely marks a high-speed data transition rather than a long period of full throttle. Because acceleration only starts to climb right after this point, it’s evident this was a setup move. Getting the car to 100% speed power just before the Engine capacity really kicks in. With DRS open and no stability issues, it’s a standard, controlled move on a straight optimal racing line.
+Conclusion:
+This peak was a preparatory input for straight-line speed. It marks the moment the car was eased into a full-load state under DRS, focusing on clean aerodynamic gain rather than a reactive or high-stress manoeuvre.
