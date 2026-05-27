@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -11,23 +12,23 @@ router = APIRouter(prefix="/checksheets", tags=["Checksheets"])
 
 class ResultIn(BaseModel):
     check_item_id:    int
-    measured_value:   str = None
-    measured_numeric: float = None
-    status:           str = None
-    notes:            str = None
+    measured_value:   Optional[str] = None
+    measured_numeric: Optional[float] = None
+    status:           Optional[str] = None
+    notes:            Optional[str] = None
 
 class SessionIn(BaseModel):
     template_id:     int
-    lead_technician: str = None
-    inspection_date: str = None
-    job_card_no:     str = None
-    vehicle_model:   str = None
-    vin_chassis:     str = None
-    odometer_km:     str = None
-    instrument_name: str = None
-    model_serial:    str = None
-    location_dept:   str = None
-    next_due_date:   str = None
+    lead_technician: Optional[str] = None
+    inspection_date: Optional[str] = None
+    job_card_no:     Optional[str] = None
+    vehicle_model:   Optional[str] = None
+    vin_chassis:     Optional[str] = None
+    odometer_km:     Optional[str] = None
+    instrument_name: Optional[str] = None
+    model_serial:    Optional[str] = None
+    location_dept:   Optional[str] = None
+    next_due_date:   Optional[str] = None
     results:         list[ResultIn]
 
 
@@ -37,8 +38,8 @@ def save_report(
     db: Session = Depends(get_db),
     user: User = Depends(require_role("engineer"))  # Only engineer/admin can save
 ):
-    session_data = payload.dict(exclude={"results"})
-    results_data = [r.dict() for r in payload.results]
+    session_data = payload.model_dump(exclude={"results"})
+    results_data = [r.model_dump() for r in payload.results]
     
     # Associate technician username if not manually entered
     if not session_data.get("lead_technician"):
@@ -129,7 +130,17 @@ def list_templates(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    return crud.get_all_templates(db)
+    return [
+        {
+            "id": t.id,
+            "template_name": t.template_name,
+            "form_ref": t.form_ref,
+            "org_name": t.org_name,
+            "checksheet_type": t.checksheet_type,
+            "created_at": str(t.created_at) if t.created_at else None,
+        }
+        for t in crud.get_all_templates(db)
+    ]
 
 @router.get("/templates/{template_id}/items")
 def get_template_items(
@@ -137,4 +148,20 @@ def get_template_items(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    return crud.get_check_items(db, template_id)
+    items = crud.get_check_items(db, template_id)
+    if not items:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return [
+        {
+            "id": i.id,
+            "template_id": i.template_id,
+            "ref_number": i.ref_number,
+            "parameter_name": i.parameter_name,
+            "unit": i.unit,
+            "range_standard": i.range_standard,
+            "range_min": i.range_min,
+            "range_max": i.range_max,
+            "range_type": i.range_type,
+        }
+        for i in items
+    ]

@@ -1,7 +1,11 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Optional
 from app.core.security import hash_password
+
+
+def normalize_username(username: str) -> str:
+    return (username or "").strip().lower()
 
 @dataclass
 class User:
@@ -38,9 +42,12 @@ _USERS: dict[str, User] = {
 }
 
 def get_user(username: str) -> Optional[User]:
-    return _USERS.get(username)
+    return _USERS.get(normalize_username(username))
 
 def create_user(username: str, plain_password: str, role: str) -> User:
+    username = normalize_username(username)
+    if not username:
+        raise ValueError("Username cannot be empty")
     if username in _USERS:
         raise ValueError(f"Username '{username}' already exists")
     if role not in ("admin", "engineer", "viewer"):

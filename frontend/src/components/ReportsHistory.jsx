@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { apiFetch } from "../auth";
+import { apiFetch, formatApiError } from "../auth";
 
 export default function ReportsHistory() {
   const [reports, setReports] = useState([]);
@@ -23,9 +23,10 @@ export default function ReportsHistory() {
   const fetchReports = () => {
     setLoading(true);
     apiFetch("http://127.0.0.1:8000/api/checksheets/reports")
-      .then(res => {
-        if (!res.ok) throw new Error("Could not fetch reports list");
-        return res.json();
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(formatApiError(data, "Could not fetch reports list"));
+        return data;
       })
       .then(data => {
         setReports(data);
@@ -44,9 +45,10 @@ export default function ReportsHistory() {
     setDetailsError(null);
 
     apiFetch(`http://127.0.0.1:8000/api/checksheets/reports/${reportId}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Could not retrieve report details");
-        return res.json();
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(formatApiError(data, "Could not retrieve report details"));
+        return data;
       })
       .then(data => {
         setDetails(data);

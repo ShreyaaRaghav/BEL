@@ -25,7 +25,6 @@ export default function Login({ onLogin }) {
     <div style={S.page}>
       <div style={S.card}>
         <div style={S.header}>
-          <div style={S.logo}>⚡</div>
           <div style={S.title}>BHARAT ELECTRONICS</div>
           <div style={S.subtitle}>Secure Checksheet Processing Portal</div>
         </div>
@@ -58,7 +57,7 @@ export default function Login({ onLogin }) {
             />
           </div>
 
-          {error && <div style={S.error}>⚠️ {error}</div>}
+          {error && <div style={S.error}>{error}</div>}
 
           <button style={S.button} type="submit" disabled={loading}>
             {loading ? (
@@ -68,6 +67,13 @@ export default function Login({ onLogin }) {
             ) : "Access System"}
           </button>
         </form>
+
+        <div style={S.demoBox}>
+          <div style={S.demoTitle}>Demo accounts</div>
+          <div style={S.demoRow}><strong>Admin</strong> bel_admin / Admin@BEL#2025!</div>
+          <div style={S.demoRow}><strong>Engineer</strong> bel_engineer / Engineer@BEL#2025!</div>
+          <div style={S.demoRow}><strong>Viewer</strong> bel_viewer / Viewer@BEL#2025!</div>
+        </div>
 
         <p style={S.notice}>
           Authorised BEL personal access only. All system events, access logs, and inspection reviews are subject to active cryptographic auditing.
@@ -94,27 +100,16 @@ const S = {
     overflow: "hidden"
   },
   card: {
-    background: "hsla(228, 20%, 14%, 0.6)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    border: "1px solid hsla(228, 15%, 25%, 0.4)",
-    borderRadius: 24,
+    background: "#0f1c31",
+    border: "1px solid #203450",
+    borderRadius: 14,
     padding: "48px 40px",
     width: 400,
-    boxShadow: "0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)"
+    boxShadow: "0 10px 24px rgba(0, 0, 0, 0.35)"
   },
   header: {
     textAlign: "center",
     marginBottom: 32
-  },
-  logo: {
-    fontSize: 48,
-    marginBottom: 12,
-    background: "linear-gradient(135deg, hsl(265, 85%, 65%), hsl(190, 90%, 55%))",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    display: "inline-block",
-    animation: "float 3s ease-in-out infinite"
   },
   title: {
     fontSize: 18,
@@ -166,14 +161,14 @@ const S = {
     width: "100%",
     marginTop: 24,
     padding: 14,
-    background: "linear-gradient(135deg, hsl(265, 85%, 65%), hsl(265, 80%, 55%))",
+    background: "linear-gradient(135deg, #1f66cb, #2c7be5)",
     color: "#fff",
     border: "none",
     borderRadius: 12,
     fontSize: 15,
     fontWeight: 600,
     cursor: "pointer",
-    boxShadow: "0 4px 15px hsla(265, 85%, 65%, 0.25)",
+    boxShadow: "0 4px 12px rgba(44, 123, 229, 0.3)",
     transition: "all 0.3s ease"
   },
   btnContent: {
@@ -190,8 +185,29 @@ const S = {
     borderTopColor: "white",
     animation: "spin 0.8s linear infinite"
   },
+  demoBox: {
+    marginTop: 20,
+    padding: "12px 14px",
+    borderRadius: 10,
+    background: "hsla(228, 20%, 10%, 0.5)",
+    border: "1px solid hsla(228, 15%, 25%, 0.5)",
+    fontSize: 11.5,
+    color: "hsl(220, 16%, 75%)",
+    lineHeight: 1.5,
+  },
+  demoTitle: {
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    marginBottom: 8,
+    color: "hsl(220, 30%, 85%)",
+    fontSize: 10,
+  },
+  demoRow: {
+    marginBottom: 4,
+  },
   notice: {
-    marginTop: 28,
+    marginTop: 16,
     fontSize: 11,
     color: "hsl(220, 10%, 50%)",
     textAlign: "center",

@@ -6,9 +6,9 @@ import ReportsHistory from "./components/ReportsHistory";
 import { logout, tryRestoreSession } from "./auth";
 
 const ROLE_COLOR = {
-  admin:    { bg: "hsla(45, 70%, 50%, 0.15)", color: "hsl(45, 75%, 70%)", border: "hsl(45, 70%, 50%)" },
-  engineer: { bg: "hsla(142, 70%, 45%, 0.15)", color: "hsl(142, 75%, 70%)", border: "hsl(142, 70%, 50%)" },
-  viewer:   { bg: "hsla(190, 90%, 55%, 0.15)", color: "hsl(190, 90%, 75%)", border: "hsl(190, 90%, 55%)" },
+  admin:    { bg: "rgba(44, 123, 229, 0.2)", color: "#d8e8ff", border: "#2c7be5" },
+  engineer: { bg: "rgba(81, 183, 255, 0.2)", color: "#d8f2ff", border: "#51b7ff" },
+  viewer:   { bg: "rgba(17, 29, 47, 0.75)", color: "#d4dbe7", border: "#5f738f" },
 };
 
 const ROLE_DESC = {
@@ -23,10 +23,12 @@ export default function App() {
   const [page, setPage] = useState("home");
 
   useEffect(() => {
-    tryRestoreSession().then(u => {
-      if (u) setUser(u);
-      setLoading(false);
-    });
+    tryRestoreSession()
+      .then((u) => {
+        if (u) setUser(u);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const handleLogout = async () => {
@@ -77,7 +79,7 @@ export default function App() {
         <div style={{ display: "flex", alignItems: "center", gap: 30 }}>
           <span style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
             onClick={() => setPage("home")}>
-            ⚡ BEL Metrology Portal
+            BEL Metrology Portal
           </span>
           
           {/* Navigation Tabs */}
@@ -90,7 +92,7 @@ export default function App() {
                 padding: "6px 16px", borderRadius: 8, cursor: "pointer", fontSize: 13.5, fontWeight: 500,
                 transition: "all 0.2s ease"
               }}>
-              📋 Process Checksheet
+              Process Checksheet
             </button>
             <button onClick={() => setPage("history")}
               style={{ 
@@ -100,7 +102,7 @@ export default function App() {
                 padding: "6px 16px", borderRadius: 8, cursor: "pointer", fontSize: 13.5, fontWeight: 500,
                 transition: "all 0.2s ease"
               }}>
-              📁 Saved Reports
+              Saved Reports
             </button>
             {user.role === "admin" && (
               <button onClick={() => setPage("audit")}
@@ -111,7 +113,7 @@ export default function App() {
                   padding: "6px 16px", borderRadius: 8, cursor: "pointer", fontSize: 13.5, fontWeight: 500,
                   transition: "all 0.2s ease"
                 }}>
-                🔍 Audit Logs
+                Audit Logs
               </button>
             )}
           </div>
@@ -119,7 +121,7 @@ export default function App() {
 
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <span style={{ color: "var(--text-secondary)", fontSize: 13.5 }}>
-            👤 ID: <strong style={{ color: "var(--text-primary)" }}>{user.username}</strong> &nbsp;|&nbsp;
+            ID: <strong style={{ color: "var(--text-primary)" }}>{user.username}</strong> &nbsp;|&nbsp;
             <span style={{ 
               background: roleStyle.bg, 
               color: roleStyle.color, 
@@ -159,7 +161,7 @@ export default function App() {
           color: "var(--text-secondary)", 
           border: `1px solid var(--card-border)`
         }}>
-          💡 <strong>Privilege Context:</strong> {ROLE_DESC[user.role]}
+          <strong>Privilege Context:</strong> {ROLE_DESC[user.role]}
         </div>
       </div>
 

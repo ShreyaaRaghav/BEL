@@ -1,35 +1,26 @@
-/* Modern premium CSS styling with rich glassmorphism and deep dark aesthetics */
-
+/* Clean BEL dark-blue theme */
 :root {
-  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
-  /* HSL Sleek Palette */
-  --bg-gradient-start: hsl(230, 25%, 8%);
-  --bg-gradient-end: hsl(235, 30%, 4%);
-  --card-bg: hsla(228, 20%, 14%, 0.6);
-  --card-border: hsla(228, 15%, 25%, 0.4);
-  
-  --primary: hsl(265, 85%, 65%);
-  --primary-hover: hsl(265, 85%, 72%);
-  --primary-glow: hsla(265, 85%, 65%, 0.25);
-  
-  --accent-cyan: hsl(190, 90%, 55%);
-  --text-primary: hsl(220, 40%, 96%);
-  --text-secondary: hsl(220, 16%, 70%);
-  --text-muted: hsl(220, 10%, 50%);
-  
-  /* Status Colors */
-  --status-pass-bg: hsla(142, 70%, 45%, 0.15);
-  --status-pass-border: hsl(142, 70%, 50%);
-  --status-pass-text: hsl(142, 75%, 70%);
-  --status-pass-glow: hsla(142, 70%, 50%, 0.2);
-  
-  --status-fail-bg: hsla(350, 70%, 50%, 0.15);
-  --status-fail-border: hsl(350, 70%, 55%);
-  --status-fail-text: hsl(350, 75%, 72%);
-  --status-fail-glow: hsla(350, 70%, 55%, 0.2);
-  
-  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-sans: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  --bg-gradient-start: #060b14;
+  --bg-gradient-end: #0a1424;
+  --card-bg: #0f1c31;
+  --card-border: #203450;
+  --primary: #2c7be5;
+  --primary-hover: #4d95f0;
+  --primary-glow: rgba(44, 123, 229, 0.3);
+  --accent-cyan: #51b7ff;
+  --text-primary: #f7f9fc;
+  --text-secondary: #bdc9dd;
+  --text-muted: #8c9ab0;
+  --status-pass-bg: rgba(26, 115, 68, 0.28);
+  --status-pass-border: #2ca35b;
+  --status-pass-text: #9be2b1;
+  --status-pass-glow: rgba(44, 163, 91, 0.16);
+  --status-fail-bg: rgba(155, 42, 42, 0.28);
+  --status-fail-border: #d24a4a;
+  --status-fail-text: #ffb0b0;
+  --status-fail-glow: rgba(210, 74, 74, 0.16);
+  --transition-smooth: all 0.2s ease;
 }
 
 * {
@@ -51,31 +42,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Background glowing accent blobs */
-body::before, body::after {
-  content: '';
-  position: absolute;
-  width: 350px;
-  height: 350px;
-  border-radius: 50%;
-  filter: blur(120px);
-  z-index: -1;
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-body::before {
-  top: 10%;
-  left: 15%;
-  background: var(--primary);
-}
-
-body::after {
-  bottom: 15%;
-  right: 15%;
-  background: var(--accent-cyan);
-}
-
 #root {
   width: 100%;
   max-width: 800px;
@@ -85,14 +51,10 @@ body::after {
 /* Premium Layout Container */
 .container {
   background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
-  border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  animation: fadeIn 0.6s ease-out;
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
 h1, h2, h3 {
@@ -101,7 +63,7 @@ h1, h2, h3 {
 }
 
 .title-gradient {
-  background: linear-gradient(135deg, hsl(0, 0%, 100%) 30%, var(--text-secondary));
+  background: linear-gradient(135deg, #ffffff 20%, #d3e7ff 80%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 8px;
@@ -128,9 +90,8 @@ h1, h2, h3 {
 
 .upload-zone:hover {
   border-color: var(--primary);
-  background: hsla(228, 20%, 22%, 0.4);
-  box-shadow: 0 0 20px var(--primary-glow);
-  transform: translateY(-2px);
+  background: rgba(37, 73, 117, 0.35);
+  box-shadow: 0 0 0 1px var(--primary-glow);
 }
 
 .upload-zone input[type="file"] {
@@ -144,13 +105,12 @@ h1, h2, h3 {
 }
 
 .upload-icon {
-  font-size: 3rem;
+  font-size: 2.4rem;
   margin-bottom: 12px;
   display: inline-block;
   background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: float 3s ease-in-out infinite;
 }
 
 .upload-text-main {
@@ -215,15 +175,14 @@ h1, h2, h3 {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), hsl(265, 80%, 55%));
+  background: linear-gradient(135deg, #1f66cb, var(--primary));
   color: white;
   box-shadow: 0 4px 15px var(--primary-glow);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--primary-hover), hsl(265, 80%, 60%));
-  box-shadow: 0 6px 20px hsla(265, 85%, 65%, 0.4);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #2a74dd, var(--primary-hover));
+  box-shadow: 0 4px 12px var(--primary-glow);
 }
 
 .btn-primary:active {
@@ -322,9 +281,8 @@ h1, h2, h3 {
 }
 
 .field-card:hover {
-  border-color: hsla(228, 20%, 40%, 0.4);
-  background: hsla(228, 20%, 20%, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #2f4d72;
+  background: rgba(24, 42, 68, 0.7);
 }
 
 .field-info {
@@ -417,11 +375,6 @@ h1, h2, h3 {
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
 }
 
 @keyframes spin {

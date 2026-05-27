@@ -2,14 +2,16 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from app.config import MAX_FAILED_ATTEMPTS, LOCKOUT_MINUTES, TOKEN_EXPIRE_MINUTES
-from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token
+from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token, hash_password
 from app.core.rbac import get_current_user, require_role
-from app.models.user import User, get_user, create_user
+from app.models.user import User, get_user, create_user, normalize_username
 from app.models.audit_log import add_log, get_logs
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 revoked_jtis: set[str] = set()
+# Valid bcrypt hash used for constant-time verification when username is missing.
+DUMMY_HASH = hash_password("BelDummyAuth@2026!")
 
 class LoginRequest(BaseModel):
     username: str
@@ -27,18 +29,18 @@ class UserCreate(BaseModel):
 @router.post("/login")
 def login(body: LoginRequest, request: Request):
     ip = request.client.host
+    username = normalize_username(body.username)
 
-    dummy_hash = "$2b$12$KIXnhTqKQMiV4oGWZmQOj.dummyhashplaceholderXXXXXXXXXXX"
-    user = get_user(body.username)
-    stored_hash = user.hashed_password if user else dummy_hash
+    user = get_user(username)
+    stored_hash = user.hashed_password if user else DUMMY_HASH
     password_ok = verify_password(body.password, stored_hash)
 
     if user is None:
-        add_log(username=body.username, role="unknown", ip_address=ip, status="FAILED")
+        add_log(username=username or "unknown", role="unknown", ip_address=ip, status="FAILED")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     if user.is_locked():
-        add_log(username=body.username, role=user.role, ip_address=ip, status="LOCKED")
+        add_log(username=username, role=user.role, ip_address=ip, status="LOCKED")
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                             detail=f"Account locked until {user.locked_until.strftime('%H:%M UTC')}")
 
@@ -46,10 +48,10 @@ def login(body: LoginRequest, request: Request):
         user.failed_attempts += 1
         if user.failed_attempts >= MAX_FAILED_ATTEMPTS:
             user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=LOCKOUT_MINUTES)
-            add_log(username=body.username, role=user.role, ip_address=ip, status="LOCKED")
+            add_log(username=username, role=user.role, ip_address=ip, status="LOCKED")
             raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                                 detail=f"Too many failed attempts. Account locked for {LOCKOUT_MINUTES} minutes.")
-        add_log(username=body.username, role=user.role, ip_address=ip, status="FAILED")
+        add_log(username=username, role=user.role, ip_address=ip, status="FAILED")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     if not user.is_active:
@@ -66,6 +68,11 @@ def login(body: LoginRequest, request: Request):
         "refresh_token": create_refresh_token(user.username, user.role),
         "token_type": "bearer",
         "expires_in": TOKEN_EXPIRE_MINUTES * 60,
+        "user": {
+            "username": user.username,
+            "role": user.role,
+            "is_active": user.is_active,
+        },
     }
 
 

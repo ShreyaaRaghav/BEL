@@ -8,13 +8,20 @@ export default function AuditLogs() {
 
   useEffect(() => {
     apiFetch("http://127.0.0.1:8000/api/auth/audit-logs")
-      .then(res => res.json())
-      .then(data => {
-        setLogs(data);
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(
+            typeof data.detail === "string"
+              ? data.detail
+              : "Failed to load secure audit logs."
+          );
+        }
+        setLogs(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(() => {
-        setError("Failed to load secure audit logs.");
+      .catch((err) => {
+        setError(err.message || "Failed to load secure audit logs.");
         setLoading(false);
       });
   }, []);

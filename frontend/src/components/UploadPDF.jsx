@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { apiFetch } from "../auth";
+import { apiFetch, formatApiError } from "../auth";
 
 export default function UploadPDF({ userRole }) {
   const [file, setFile] = useState(null);
@@ -122,7 +122,11 @@ export default function UploadPDF({ userRole }) {
     String(value || "").trim().toLowerCase().replace(/[_-]+/g, " ");
 
   const isTextField = (field) =>
-    field.conditions && field.conditions.length > 0 && field.range_type === "unknown";
+    field.conditions &&
+    field.conditions.length > 0 &&
+    (field.range_type === "unknown" ||
+      field.range_type === "visual" ||
+      field.type === "categorical");
 
   const getFieldStatus = (field) => {
     const rawVal = values[field.check_item_id];
@@ -234,8 +238,8 @@ export default function UploadPDF({ userRole }) {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to persist checksheet report.");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(formatApiError(errorData, "Failed to persist checksheet report."));
       }
 
       const resJson = await res.json();
