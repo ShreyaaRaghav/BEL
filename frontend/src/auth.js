@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:8000/api";
+const API = "/api";
 
 // Access token lives in memory only (safer than localStorage for short-lived tokens)
 // Refresh token in sessionStorage (cleared when tab closes)

@@ -135,3 +135,57 @@ def audit_logs(_: User = Depends(require_role("admin"))):
         }
         for log in logs
     ]
+
+
+@router.get("/audit-analytics")
+def audit_analytics(_: User = Depends(require_role("admin"))):
+    """Admin only — view analytics on system access logs."""
+    logs = get_logs()
+    
+    total = len(logs)
+    success = sum(1 for l in logs if l.status == "SUCCESS")
+    failed = sum(1 for l in logs if l.status in ("FAILED", "LOCKED"))
+    locked = sum(1 for l in logs if l.status == "LOCKED")
+    
+    user_counts = {}
+    ip_counts = {}
+    suspicious = {}
+    
+    for l in logs:
+        # Normalize fields
+        u = l.username or "unknown"
+        ip = l.ip_address or "unknown"
+        
+        user_counts[u] = user_counts.get(u, 0) + 1
+        ip_counts[ip] = ip_counts.get(ip, 0) + 1
+        if l.status in ("FAILED", "LOCKED"):
+            key = (u, ip)
+            suspicious[key] = suspicious.get(key, 0) + 1
+            
+    top_users = [
+        {"username": u, "count": c}
+        for u, c in sorted(user_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    ]
+    
+    top_ips = [
+        {"ip_address": ip, "count": c}
+        for ip, c in sorted(ip_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    ]
+    
+    suspicious_list = [
+        {"username": k[0], "ip_address": k[1], "failed_count": c}
+        for k, c in sorted(suspicious.items(), key=lambda x: x[1], reverse=True)
+        if c >= 2
+    ]
+    
+    return {
+        "total_attempts": total,
+        "success_count": success,
+        "failed_count": failed,
+        "lockout_count": locked,
+        "success_rate": round((success / total * 100), 1) if total > 0 else 0.0,
+        "top_users": top_users,
+        "top_ips": top_ips,
+        "suspicious_activity": suspicious_list
+    }
+

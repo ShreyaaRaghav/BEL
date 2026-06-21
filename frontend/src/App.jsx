@@ -3,7 +3,10 @@ import Login from "./components/Login";
 import UploadPDF from "./components/UploadPDF";
 import AuditLogs from "./components/AuditLogs";
 import ReportsHistory from "./components/ReportsHistory";
+import Dashboard from "./components/Dashboard";
 import { logout, tryRestoreSession } from "./auth";
+
+//rbac HAPPENS HERE
 
 const ROLE_COLOR = {
   admin:    { bg: "rgba(44, 123, 229, 0.2)", color: "#d8e8ff", border: "#2c7be5" },
@@ -21,6 +24,8 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState("home");
+
+  const [activeChecksheet, setActiveChecksheet] = useState(null);
 
   useEffect(() => {
     tryRestoreSession()
@@ -84,6 +89,18 @@ export default function App() {
           
           {/* Navigation Tabs */}
           <div style={{ display: "flex", gap: "10px" }}>
+            {user.role === "admin" && (
+              <button onClick={() => setPage("dashboard")}
+                style={{ 
+                  background: page === "dashboard" ? "hsla(228, 20%, 25%, 0.5)" : "transparent",
+                  border: "1px solid " + (page === "dashboard" ? "var(--card-border)" : "transparent"), 
+                  color: page === "dashboard" ? "var(--text-primary)" : "var(--text-secondary)",
+                  padding: "6px 16px", borderRadius: 8, cursor: "pointer", fontSize: 13.5, fontWeight: 500,
+                  transition: "all 0.2s ease"
+                }}>
+                Analytics Dashboard
+              </button>
+            )}
             <button onClick={() => setPage("home")}
               style={{ 
                 background: page === "home" ? "hsla(228, 20%, 25%, 0.5)" : "transparent",
@@ -146,7 +163,7 @@ export default function App() {
               fontWeight: 500,
               transition: "all 0.2s ease" 
             }}>
-            Sign Out
+              Sign Out
           </button>
         </div>
       </nav>
@@ -167,7 +184,8 @@ export default function App() {
 
       {/* Dynamic Main Workspace Content */}
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 20px 40px 20px" }}>
-        {page === "home"    && <UploadPDF userRole={user.role} />}
+        {page === "dashboard" && user.role === "admin" && <Dashboard userRole={user.role} activeChecksheet={activeChecksheet} />}
+        {page === "home"    && <UploadPDF userRole={user.role} activeChecksheet={activeChecksheet} setActiveChecksheet={setActiveChecksheet} />}
         {page === "history" && <ReportsHistory />}
         {page === "audit"   && user.role === "admin" && <AuditLogs />}
       </div>

@@ -165,3 +165,298 @@ def get_template_items(
         }
         for i in items
     ]
+
+
+from sqlalchemy import text
+from collections import defaultdict
+from datetime import datetime
+
+@router.get("/analytics")
+def get_analytics(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    # Fetch all inspection sessions ordered chronologically
+    sessions_rows = db.execute(text("""
+        SELECT id, template_id, vehicle_model, vin_chassis, instrument_name, model_serial, job_card_no, overall_status, submitted_at
+        FROM inspection_sessions
+        ORDER BY submitted_at ASC
+    """)).fetchall()
+
+    # Group sessions by unique asset / job identifier
+    groups = defaultdict(list)
+    for s in sessions_rows:
+        key = None
+        if s.job_card_no and s.job_card_no.strip():
+            key = s.job_card_no.strip()
+        elif s.vin_chassis and s.vin_chassis.strip():
+            key = s.vin_chassis.strip()
+        elif s.model_serial and s.model_serial.strip():
+            key = s.model_serial.strip()
+        else:
+            key = f"session_{s.id}"
+        groups[key].append(s)
+
+    unique_passed = 0
+    unique_failed = 0
+    unique_pending = 0
+    
+    failed_jobs_count = 0
+    recorrected_jobs_count = 0
+    ftr_passed_jobs = 0
+    durations = []
+
+    for key, job_sessions in groups.items():
+        statuses = [js.overall_status for js in job_sessions]
+        latest_status = job_sessions[-1].overall_status
+
+        if latest_status == 'PASS':
+            unique_passed += 1
+        elif latest_status == 'FAIL':
+            unique_failed += 1
+        else:
+            unique_pending += 1
+
+        # First-Time Right (FTR) - Was the first attempt a PASS?
+        if statuses[0] == 'PASS':
+            ftr_passed_jobs += 1
+
+        # Recovery/Correction Rate & MTTR
+        if 'FAIL' in statuses:
+            failed_jobs_count += 1
+            first_fail_idx = statuses.index('FAIL')
+            subsequent_statuses = statuses[first_fail_idx:]
+            
+            # Check if it was ever corrected to PASS subsequently
+            if 'PASS' in subsequent_statuses:
+                recorrected_jobs_count += 1
+                first_pass_idx = first_fail_idx + subsequent_statuses.index('PASS')
+                
+                fail_time = job_sessions[first_fail_idx].submitted_at
+                pass_time = job_sessions[first_pass_idx].submitted_at
+                
+                if fail_time and pass_time:
+                    fail_dt, pass_dt = None, None
+                    if isinstance(fail_time, str):
+                        try:
+                            fail_dt = datetime.fromisoformat(fail_time)
+                        except:
+                            pass
+                    else:
+                        fail_dt = fail_time
+
+                    if isinstance(pass_time, str):
+                        try:
+                            pass_dt = datetime.fromisoformat(pass_time)
+                        except:
+                            pass
+                    else:
+                        pass_dt = pass_time
+
+                    if fail_dt and pass_dt:
+                        diff = (pass_dt - fail_dt).total_seconds() / 3600.0
+                        if diff >= 0:
+                            durations.append(diff)
+
+    # Compute DA metric ratios
+    recorrection_rate = round((recorrected_jobs_count / failed_jobs_count * 100), 1) if failed_jobs_count > 0 else 0.0
+    ftr_rate = round((ftr_passed_jobs / len(groups) * 100), 1) if len(groups) > 0 else 0.0
+    avg_mttr = round(sum(durations) / len(durations), 1) if durations else 0.0
+
+    # 1. Total count of saved report sessions
+    total_count = len(sessions_rows)
+    
+    # 2. Volume Trend (by month)
+    trend_rows = db.execute(text("""
+        SELECT substr(inspection_date, 1, 7) as month, 
+               COUNT(*) as total,
+               SUM(CASE WHEN overall_status = 'PASS' THEN 1 ELSE 0 END) as pass_count,
+               SUM(CASE WHEN overall_status = 'FAIL' THEN 1 ELSE 0 END) as fail_count
+        FROM inspection_sessions
+        WHERE inspection_date IS NOT NULL AND inspection_date != ''
+        GROUP BY month
+        ORDER BY month ASC
+    """)).fetchall()
+    
+    trends = []
+    for r in trend_rows:
+        trends.append({
+            "month": r[0],
+            "total": r[1],
+            "pass": r[2] or 0,
+            "fail": r[3] or 0
+        })
+ 
+    # 3. Template distribution
+    template_rows = db.execute(text("""
+        SELECT t.template_name, t.checksheet_type, COUNT(s.id) as cnt
+        FROM checksheet_templates t
+        LEFT JOIN inspection_sessions s ON s.template_id = t.id
+        GROUP BY t.id
+    """)).fetchall()
+    
+    templates = []
+    for r in template_rows:
+        templates.append({
+            "template_name": r[0],
+            "checksheet_type": r[1],
+            "count": r[2]
+        })
+
+    # 4. Top Failing Parameters (Pareto)
+    pareto_rows = db.execute(text("""
+        SELECT ci.parameter_name, COUNT(r.id) as fail_cnt
+        FROM inspection_results r
+        JOIN check_items ci ON r.check_item_id = ci.id
+        WHERE r.status = 'FAIL'
+        GROUP BY ci.parameter_name
+        ORDER BY fail_cnt DESC
+        LIMIT 5
+    """)).fetchall()
+    
+    pareto = []
+    for r in pareto_rows:
+        pareto.append({
+            "parameter_name": r[0],
+            "fail_count": r[1]
+        })
+
+    # 4.b Most Passed Parameters (Most frequently entered correct)
+    most_passed_rows = db.execute(text("""
+        SELECT ci.parameter_name, COUNT(r.id) as pass_cnt
+        FROM inspection_results r
+        JOIN check_items ci ON r.check_item_id = ci.id
+        WHERE r.status = 'PASS'
+        GROUP BY ci.parameter_name
+        ORDER BY pass_cnt DESC
+        LIMIT 5
+    """)).fetchall()
+    
+    most_passed = []
+    for r in most_passed_rows:
+        most_passed.append({
+            "parameter_name": r[0],
+            "pass_count": r[1]
+        })
+
+    # 5. Technician Leaderboard
+    tech_rows = db.execute(text("""
+        SELECT lead_technician,
+               COUNT(*) as total,
+               SUM(CASE WHEN overall_status = 'PASS' THEN 1 ELSE 0 END) as pass_count,
+               SUM(CASE WHEN overall_status = 'FAIL' THEN 1 ELSE 0 END) as fail_count
+        FROM inspection_sessions
+        GROUP BY lead_technician
+    """)).fetchall()
+    
+    technicians_list = []
+    for r in tech_rows:
+        technicians_list.append({
+            "technician": r[0] or "unknown",
+            "total": r[1],
+            "pass": r[2] or 0,
+            "fail": r[3] or 0
+        })
+
+    # 6. SPC Drift Analysis for Alternator Charging Voltage (Item 4) and Baseline Voltage Stability (Item 21)
+    spc_vehicle_rows = db.execute(text("""
+        SELECT s.id, s.job_card_no, s.inspection_date, r.measured_numeric, r.status
+        FROM inspection_results r
+        JOIN inspection_sessions s ON r.session_id = s.id
+        WHERE r.check_item_id = 4 AND r.measured_numeric IS NOT NULL
+        ORDER BY s.inspection_date ASC
+    """)).fetchall()
+    
+    spc_vehicle = []
+    for r in spc_vehicle_rows:
+        spc_vehicle.append({
+            "session_id": r[0],
+            "job_card_no": r[1] or f"JC-{1000+r[0]}",
+            "date": r[2],
+            "value": r[3],
+            "status": r[4]
+        })
+        
+    spc_instrument_rows = db.execute(text("""
+        SELECT s.id, s.job_card_no, s.inspection_date, r.measured_numeric, r.status
+        FROM inspection_results r
+        JOIN inspection_sessions s ON r.session_id = s.id
+        WHERE r.check_item_id = 21 AND r.measured_numeric IS NOT NULL
+        ORDER BY s.inspection_date ASC
+    """)).fetchall()
+    
+    spc_instrument = []
+    for r in spc_instrument_rows:
+        spc_instrument.append({
+            "session_id": r[0],
+            "job_card_no": r[1] or f"JC-{1000+r[0]}",
+            "date": r[2],
+            "value": r[3],
+            "status": r[4]
+        })
+
+    due_soon_count = db.execute(text("""
+        SELECT COUNT(*) 
+        FROM inspection_sessions 
+        WHERE next_due_date IS NOT NULL AND next_due_date != ''
+    """)).scalar() or 0
+
+    return {
+        "overview": {
+            "total_reports": total_count,
+            "passed": unique_passed,
+            "failed": unique_failed,
+            "pass_rate": round((unique_passed / len(groups) * 100), 1) if len(groups) > 0 else 0.0,
+            "due_soon": due_soon_count,
+            "recorrection_rate": recorrection_rate,
+            "ftr_rate": ftr_rate,
+            "avg_mttr_hours": avg_mttr
+        },
+        "trends": trends,
+        "templates": templates,
+        "pareto": pareto,
+        "most_passed": most_passed,
+        "technicians": technicians_list,
+        "spc": {
+            "vehicle": {
+                "parameter_name": "Alternator Charging Voltage",
+                "unit": "V",
+                "min": 13.8,
+                "max": 14.7,
+                "data": spc_vehicle
+            },
+            "instrument": {
+                "parameter_name": "Baseline Voltage Stability",
+                "unit": "V",
+                "min": 4.95,
+                "max": 5.05,
+                "data": spc_instrument
+            }
+        }
+    }
+
+
+@router.post("/reset-demo-data")
+def reset_demo_data(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_role("engineer"))
+):
+    import sqlite3
+    from database.init_db import DB_PATH
+    
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    try:
+        cur.execute("PRAGMA foreign_keys = ON;")
+        cur.execute("DELETE FROM inspection_results")
+        cur.execute("DELETE FROM inspection_sessions")
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to clear database: {str(e)}")
+    finally:
+        conn.close()
+        
+    return {"message": "Database cleared successfully. All inspection records deleted."}
+
+

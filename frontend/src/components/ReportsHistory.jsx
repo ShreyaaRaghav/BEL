@@ -22,7 +22,7 @@ export default function ReportsHistory() {
 
   const fetchReports = () => {
     setLoading(true);
-    apiFetch("http://127.0.0.1:8000/api/checksheets/reports")
+    apiFetch("/api/checksheets/reports")
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(formatApiError(data, "Could not fetch reports list"));
@@ -44,7 +44,7 @@ export default function ReportsHistory() {
     setDetails(null);
     setDetailsError(null);
 
-    apiFetch(`http://127.0.0.1:8000/api/checksheets/reports/${reportId}`)
+    apiFetch(`/api/checksheets/reports/${reportId}`)
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(formatApiError(data, "Could not retrieve report details"));
@@ -92,7 +92,7 @@ export default function ReportsHistory() {
       {/* Header & Controls */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "15px", marginBottom: "24px" }}>
         <div>
-          <h2 className="title-gradient" style={{ fontSize: "1.8rem", marginBottom: "6px" }}>📁 Saved Inspection Reports</h2>
+          <h2 className="title-gradient" style={{ fontSize: "1.8rem", marginBottom: "6px" }}> Saved Inspection Reports</h2>
           <p className="subtitle" style={{ fontSize: "0.95rem", margin: 0 }}>
             Browse and review past PDF checksheet persistences stored in the SQLite database.
           </p>
@@ -135,7 +135,7 @@ export default function ReportsHistory() {
           border: "1px solid rgb(244, 63, 94)",
           color: "rgb(251, 113, 133)",
         }}>
-          ⚠️ {error}
+           {error}
         </div>
       )}
 
@@ -207,7 +207,7 @@ export default function ReportsHistory() {
             <div style={modalHeaderStyle}>
               <div>
                 <h3 style={{ fontSize: "1.35rem", fontWeight: 600, color: "var(--text-primary)" }}>
-                  📄 Persistence Details: Report #{selectedReportId}
+                   Persistence Details: Report #{selectedReportId}
                 </h3>
                 {details && (
                   <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "var(--text-muted)" }}>
@@ -228,7 +228,7 @@ export default function ReportsHistory() {
 
               {detailsError && (
                 <div style={{ padding: "16px", borderRadius: "12px", background: "rgba(244, 63, 94, 0.15)", border: "1px solid rgb(244, 63, 94)", color: "rgb(251, 113, 133)" }}>
-                  ⚠️ {detailsError}
+                   {detailsError}
                 </div>
               )}
 
@@ -301,7 +301,7 @@ export default function ReportsHistory() {
                   {/* Inspection Items Table */}
                   <div>
                     <h4 style={{ color: "var(--text-primary)", fontSize: "0.95rem", fontWeight: 600, marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                      📋 Tolerance Compliance Checklist
+                      Tolerance Compliance Checklist
                     </h4>
                     <div style={{ overflowX: "auto", borderRadius: "12px", border: "1px solid var(--card-border)" }}>
                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>

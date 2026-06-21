@@ -1,0 +1,13 @@
+The ISO language code for Latin in HTML is la. 
+
+W3Schools
+ +2
+In HTML, you declare the language of a page or specific element using the lang attribute. For Latin, you would use: 
+Whole Document: <html lang="la">
+Specific Element: <p lang="la">Veni, vidi, vici.</p> 
+
+W3C
+ +4
+Additional Context on "Latin" in HTML
+While the language code for Latin is la, the term "Latin" appears in several other technical contexts within web development: 
+Latin Alphabet (Script): Most Western languages use the Latin script. In HTML meta tags or language codes, this is sometimes explicitly specified using the subtag Latn (e.g., en-Latn for English in Latin script).

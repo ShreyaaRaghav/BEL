@@ -7,7 +7,7 @@ export default function AuditLogs() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    apiFetch("http://127.0.0.1:8000/api/auth/audit-logs")
+    apiFetch("/api/auth/audit-logs")
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
@@ -51,7 +51,7 @@ export default function AuditLogs() {
   return (
     <div style={{ marginTop: "20px", animation: "fadeIn 0.5s ease-out" }}>
       <div style={{ marginBottom: "24px" }}>
-        <h2 className="title-gradient" style={{ fontSize: "1.8rem", marginBottom: "6px" }}>🔍 Login Audit Logs</h2>
+        <h2 className="title-gradient" style={{ fontSize: "1.8rem", marginBottom: "6px" }}>Login Audit Logs</h2>
         <p className="subtitle" style={{ fontSize: "0.95rem", margin: 0 }}>
           Real-time record of all system access attempts — restricted to Administrator role.
         </p>
@@ -71,7 +71,7 @@ export default function AuditLogs() {
           border: "1px solid rgb(244, 63, 94)",
           color: "rgb(251, 113, 133)",
         }}>
-          ⚠️ {error}
+          {error}
         </div>
       )}
 

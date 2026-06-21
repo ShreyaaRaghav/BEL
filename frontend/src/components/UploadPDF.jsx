@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { apiFetch, formatApiError } from "../auth";
 
-export default function UploadPDF({ userRole }) {
-  const [file, setFile] = useState(null);
+export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksheet }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [data, setData] = useState(null);
   
-  // Track user input values & notes keyed by check_item_id
-  const [values, setValues] = useState({});
-  const [notes, setNotes] = useState({});
-  
-  // Metadata state for the session
-  const [meta, setMeta] = useState({
+  // Track database storage status
+  const [savedStatus, setSavedStatus] = useState(null);
+
+  // Derived states from lifted activeChecksheet
+  const file = activeChecksheet?.file || null;
+  const data = activeChecksheet?.data || null;
+  const values = activeChecksheet?.values || {};
+  const notes = activeChecksheet?.notes || {};
+  const meta = activeChecksheet?.meta || {
     job_card_no: "",
     vehicle_model: "",
     vin_chassis: "",
@@ -21,19 +22,29 @@ export default function UploadPDF({ userRole }) {
     model_serial: "",
     location_dept: "",
     next_due_date: "",
-    inspection_date: new Date().toISOString().substring(0, 10), // default to today
-  });
-
-  // Track database storage status
-  const [savedStatus, setSavedStatus] = useState(null);
+    inspection_date: new Date().toISOString().substring(0, 10),
+  };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      setActiveChecksheet({
+        file: e.target.files[0],
+        data: null,
+        values: {},
+        notes: {},
+        meta: {
+          job_card_no: "",
+          vehicle_model: "",
+          vin_chassis: "",
+          odometer_km: "",
+          instrument_name: "",
+          model_serial: "",
+          location_dept: "",
+          next_due_date: "",
+          inspection_date: new Date().toISOString().substring(0, 10),
+        }
+      });
       setError(null);
-      setData(null);
-      setValues({});
-      setNotes({});
       setSavedStatus(null);
     }
   };
@@ -43,16 +54,13 @@ export default function UploadPDF({ userRole }) {
 
     setLoading(true);
     setError(null);
-    setData(null);
-    setValues({});
-    setNotes({});
     setSavedStatus(null);
 
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const res = await apiFetch("http://127.0.0.1:8000/api/upload-pdf", {
+      const res = await apiFetch("/api/upload-pdf", {
         method: "POST",
         body: formData,
       });
@@ -67,8 +75,6 @@ export default function UploadPDF({ userRole }) {
         throw new Error(result.error);
       }
       
-      setData(result);
-      
       // Initialize inputs with empty strings
       const initialValues = {};
       const initialNotes = {};
@@ -76,16 +82,26 @@ export default function UploadPDF({ userRole }) {
         initialValues[field.check_item_id] = "";
         initialNotes[field.check_item_id] = "";
       });
-      setValues(initialValues);
-      setNotes(initialNotes);
 
-      // Pre-fill metadata if template returned matches
-      setMeta(prev => ({
-        ...prev,
-        vehicle_model: result.checksheet_type === "vehicle" ? (result.filename.split(".")[0]) : "",
-        instrument_name: result.checksheet_type === "instrument" ? (result.filename.split(".")[0]) : "",
+      const initialMeta = {
         job_card_no: `JC-${Math.floor(100000 + Math.random() * 900000)}`, // Seed random job card
-      }));
+        vehicle_model: result.checksheet_type === "vehicle" ? (result.filename.split(".")[0]) : "",
+        vin_chassis: "",
+        odometer_km: "",
+        instrument_name: result.checksheet_type === "instrument" ? (result.filename.split(".")[0]) : "",
+        model_serial: "",
+        location_dept: "",
+        next_due_date: "",
+        inspection_date: new Date().toISOString().substring(0, 10), // default to today
+      };
+
+      setActiveChecksheet({
+        file: file,
+        data: result,
+        values: initialValues,
+        notes: initialNotes,
+        meta: initialMeta
+      });
 
     } catch (err) {
       console.error(err);
@@ -96,24 +112,33 @@ export default function UploadPDF({ userRole }) {
   };
 
   const handleInputChange = (checkItemId, val) => {
-    setValues((prev) => ({
+    setActiveChecksheet((prev) => ({
       ...prev,
-      [checkItemId]: val,
+      values: {
+        ...(prev?.values || {}),
+        [checkItemId]: val,
+      }
     }));
     setSavedStatus(null);
   };
 
   const handleNoteChange = (checkItemId, val) => {
-    setNotes((prev) => ({
+    setActiveChecksheet((prev) => ({
       ...prev,
-      [checkItemId]: val,
+      notes: {
+        ...(prev?.notes || {}),
+        [checkItemId]: val,
+      }
     }));
   };
 
   const handleMetaChange = (key, val) => {
-    setMeta(prev => ({
+    setActiveChecksheet((prev) => ({
       ...prev,
-      [key]: val
+      meta: {
+        ...(prev?.meta || {}),
+        [key]: val,
+      }
     }));
     setSavedStatus(null);
   };
@@ -231,7 +256,7 @@ export default function UploadPDF({ userRole }) {
     };
 
     try {
-      const res = await apiFetch("http://127.0.0.1:8000/api/checksheets/save-report", {
+      const res = await apiFetch("/api/checksheets/save-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -246,8 +271,7 @@ export default function UploadPDF({ userRole }) {
       setSavedStatus(`Checksheet persisted successfully to SQLite database! Report ID: #${resJson.id} (Overall: ${resJson.overall_status})`);
       
       // Clear selections
-      setFile(null);
-      setData(null);
+      setActiveChecksheet(null);
     } catch (err) {
       console.error(err);
       setError(err.message || "Persistence failure. Make sure all metadata fields are filled correctly.");
