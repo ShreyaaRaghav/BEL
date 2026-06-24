@@ -33,7 +33,7 @@ class SecurityHeadersMiddleware:
         await self.app(scope, receive, send_with_headers)
 
 
-from app.api import auth, upload, checksheet
+from app.api import auth, upload, checksheet, sensor_upload
 from app.config import ALLOWED_ORIGINS
 from app.vapt import router as vapt_router
 import database.init_db
@@ -66,6 +66,7 @@ app.add_middleware(
 app.add_middleware(SecurityHeadersMiddleware)
 app.include_router(auth.router, prefix="/api")
 app.include_router(upload.router, prefix="/api")
+app.include_router(sensor_upload.router, prefix="/api")
 app.include_router(checksheet.router, prefix="/api")
 app.include_router(vapt_router.router, prefix="/api")
 
