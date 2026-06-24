@@ -439,7 +439,7 @@ def get_analytics(
 @router.post("/reset-demo-data")
 def reset_demo_data(
     db: Session = Depends(get_db),
-    user: User = Depends(require_role("engineer"))
+    user: User = Depends(require_role("admin"))  # VAPT: upgraded from engineer to admin
 ):
     import sqlite3
     from database.init_db import DB_PATH

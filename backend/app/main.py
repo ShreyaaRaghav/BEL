@@ -2,8 +2,40 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+
+class SecurityHeadersMiddleware:
+    """Injects OWASP-recommended HTTP security headers on every response."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_headers(message):
+            if message["type"] == "http.response.start":
+                headers = dict(message.get("headers", []))
+                security_headers = {
+                    b"x-content-type-options": b"nosniff",
+                    b"x-frame-options": b"DENY",
+                    b"x-xss-protection": b"1; mode=block",
+                    b"referrer-policy": b"no-referrer",
+                    b"content-security-policy": b"default-src \'self\'",
+                    b"cache-control": b"no-store",
+                    b"permissions-policy": b"geolocation=(), microphone=()",
+                }
+                for k, v in security_headers.items():
+                    headers.setdefault(k, v)
+                message = {**message, "headers": list(headers.items())}
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
 from app.api import auth, upload, checksheet
 from app.config import ALLOWED_ORIGINS
+from app.vapt import router as vapt_router
 import database.init_db
 
 app = FastAPI(title="BEL Secure Checksheet API Portal")
@@ -31,9 +63,11 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+app.add_middleware(SecurityHeadersMiddleware)
 app.include_router(auth.router, prefix="/api")
 app.include_router(upload.router, prefix="/api")
 app.include_router(checksheet.router, prefix="/api")
+app.include_router(vapt_router.router, prefix="/api")
 
 @app.get("/")
 def home():
