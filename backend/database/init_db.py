@@ -57,6 +57,21 @@ def init():
         notes            TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS audit_logs (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        username   TEXT NOT NULL,
+        role       TEXT NOT NULL,
+        ip_address TEXT NOT NULL,
+        timestamp  DATETIME DEFAULT CURRENT_TIMESTAMP,
+        status     TEXT NOT NULL DEFAULT 'SUCCESS'
+    );
+
+    CREATE TABLE IF NOT EXISTS revoked_tokens (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        jti        TEXT UNIQUE NOT NULL,
+        expires_at DATETIME NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_results_session   ON inspection_results(session_id);
     CREATE INDEX IF NOT EXISTS idx_items_template    ON check_items(template_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_template ON inspection_sessions(template_id);
@@ -375,6 +390,22 @@ def seed_demo_data(cur):
                 INSERT INTO inspection_results (session_id, check_item_id, measured_value, measured_numeric, status, notes)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (session_id, item_id, val_str, val_num, res_status, notes))
+
+def prune_expired_tokens():
+    """Prunes expired refresh tokens from database."""
+    import sqlite3
+    from datetime import datetime
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    try:
+        now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        cur.execute("DELETE FROM revoked_tokens WHERE expires_at < ?", (now_str,))
+        conn.commit()
+    except Exception as e:
+        print(f"Error pruning expired tokens: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
 
 if __name__ == "__main__":
     init()

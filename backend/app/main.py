@@ -54,6 +54,12 @@ async def validation_exception_handler(_request: Request, exc: RequestValidation
 def on_startup():
     print("Initializing and seeding SQLite checksheet database...")
     database.init_db.init()
+    try:
+        from database.init_db import prune_expired_tokens
+        prune_expired_tokens()
+        print("Expired revoked tokens pruned.")
+    except Exception as e:
+        print(f"Failed to prune expired tokens: {e}")
 
 app.add_middleware(
     CORSMiddleware,

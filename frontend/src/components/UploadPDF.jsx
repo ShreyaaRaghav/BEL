@@ -25,6 +25,8 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
     inspection_date: new Date().toISOString().substring(0, 10),
   };
 
+  const [uploadType, setUploadType] = useState("pdf"); // "pdf" or "sensor"
+
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setActiveChecksheet({
@@ -59,14 +61,17 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
     const formData = new FormData();
     formData.append("file", file);
 
+    const endpoint = uploadType === "pdf" ? "/api/upload-pdf" : "/api/upload/parse-sensor-file";
+
     try {
-      const res = await apiFetch("/api/upload-pdf", {
+      const res = await apiFetch(endpoint, {
         method: "POST",
         body: formData,
       });
 
       if (!res.ok) {
-        throw new Error(`Server returned status: ${res.status}`);
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.detail || `Server returned status: ${res.status}`);
       }
 
       const result = await res.json();
@@ -75,11 +80,13 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
         throw new Error(result.error);
       }
       
-      // Initialize inputs with empty strings
+      // Initialize inputs with parsed values if available
       const initialValues = {};
       const initialNotes = {};
       result.fields.forEach((field) => {
-        initialValues[field.check_item_id] = "";
+        initialValues[field.check_item_id] = (result.values && result.values[field.check_item_id] !== undefined)
+          ? result.values[field.check_item_id]
+          : "";
         initialNotes[field.check_item_id] = "";
       });
 
@@ -292,6 +299,50 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
         <p className="subtitle">Upload industrial checksheet PDF blueprints, match metrology parameters, and verify compliance.</p>
       </div>
 
+      {/* Upload Mode Selector Toggle */}
+      {!isViewer && (
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "12px",
+          marginBottom: "24px",
+          animation: "fadeIn 0.4s ease-out"
+        }}>
+          <button
+            onClick={() => { setUploadType("pdf"); setActiveChecksheet(null); setError(null); setSavedStatus(null); }}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "12px",
+              background: uploadType === "pdf" ? "var(--primary)" : "hsla(228, 20%, 14%, 0.4)",
+              color: "white",
+              border: "1px solid " + (uploadType === "pdf" ? "var(--primary)" : "var(--card-border)"),
+              boxShadow: uploadType === "pdf" ? "0 0 10px var(--primary-glow)" : "none",
+              cursor: "pointer",
+              fontWeight: 600,
+              transition: "all 0.3s ease"
+            }}
+          >
+            📄 Blueprint PDF Template
+          </button>
+          <button
+            onClick={() => { setUploadType("sensor"); setActiveChecksheet(null); setError(null); setSavedStatus(null); }}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "12px",
+              background: uploadType === "sensor" ? "var(--primary)" : "hsla(228, 20%, 14%, 0.4)",
+              color: "white",
+              border: "1px solid " + (uploadType === "sensor" ? "var(--primary)" : "var(--card-border)"),
+              boxShadow: uploadType === "sensor" ? "0 0 10px var(--primary-glow)" : "none",
+              cursor: "pointer",
+              fontWeight: 600,
+              transition: "all 0.3s ease"
+            }}
+          >
+            ⚡ Sensor Reader Log (.txt)
+          </button>
+        </div>
+      )}
+
       {/* Viewer alert notice */}
       {isViewer && (
         <div style={{
@@ -312,13 +363,19 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
 
       {/* File Upload Selector Zone */}
       <div className="upload-zone" style={{ pointerEvents: isViewer ? "none" : "auto", opacity: isViewer ? 0.5 : 1 }}>
-        <span className="upload-icon" role="img" aria-label="upload">📄</span>
-        <p className="upload-text-main">Drag and drop your PDF checksheet, or browse</p>
-        <p className="upload-text-sub">Supports industrial metrology & calibration manuals (PDF)</p>
+        <span className="upload-icon" role="img" aria-label="upload">
+          {uploadType === "pdf" ? "📄" : "⚡"}
+        </span>
+        <p className="upload-text-main">
+          {uploadType === "pdf" ? "Drag and drop your PDF checksheet, or browse" : "Drag and drop your checksummed sensor log, or browse"}
+        </p>
+        <p className="upload-text-sub">
+          {uploadType === "pdf" ? "Supports industrial metrology & calibration manuals (PDF)" : "Supports checksummed industrial sensor reader logs (.txt)"}
+        </p>
         {!isViewer && (
           <input
             type="file"
-            accept=".pdf,application/pdf"
+            accept={uploadType === "pdf" ? ".pdf,application/pdf" : ".txt,text/plain,.log,.csv"}
             onChange={handleFileChange}
             disabled={loading}
           />

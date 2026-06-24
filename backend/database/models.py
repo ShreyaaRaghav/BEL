@@ -69,3 +69,23 @@ class InspectionResult(Base):
 
     session    = relationship("InspectionSession", back_populates="results")
     check_item = relationship("CheckItem", back_populates="results")
+
+
+class AuditLogRecord(Base):
+    __tablename__ = "audit_logs"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    username   = Column(String, nullable=False)
+    role       = Column(String, nullable=False)
+    ip_address = Column(String, nullable=False)
+    timestamp  = Column(DateTime, server_default=func.now())
+    status     = Column(String, default="SUCCESS")
+
+
+class RevokedToken(Base):
+    __tablename__ = "revoked_tokens"
+
+    id         = Column(Integer, primary_key=True, index=True)
+    jti        = Column(String, unique=True, index=True, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+

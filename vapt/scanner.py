@@ -489,46 +489,64 @@ def _check_db_file_permissions() -> list[Finding]:
 def _check_audit_log_persistence() -> list[Finding]:
     """VAPT-009 — In-memory audit log is not persistent."""
     findings = []
-    findings.append(Finding(
-        id="VAPT-009",
-        category="Audit & Logging",
-        title="Audit logs stored in-memory — lost on server restart",
-        severity="HIGH",
-        description=(
-            "audit_log.py uses a plain Python list (_LOGS) as its backing store. "
-            "All authentication events are wiped on every server restart. "
-            "This violates audit trail requirements for defence/industrial systems."
-        ),
-        recommendation=(
-            "Persist audit logs to the SQLite database or a dedicated append-only log file. "
-            "An AuditLog SQLAlchemy model has been created — wire it into add_log()."
-        ),
-        affected_asset="backend/app/models/audit_log.py",
-        evidence="Variable _LOGS: list[AuditLog] = [] — no DB write in add_log().",
-    ))
+    audit_log_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "app", "models", "audit_log.py"))
+    try:
+        with open(audit_log_path) as fh:
+            src = fh.read()
+        is_persistent = "_LOGS" not in src and ("SessionLocal" in src or "AuditLogRecord" in src or "db.add" in src)
+    except Exception:
+        is_persistent = False
+
+    if not is_persistent:
+        findings.append(Finding(
+            id="VAPT-009",
+            category="Audit & Logging",
+            title="Audit logs stored in-memory — lost on server restart",
+            severity="HIGH",
+            description=(
+                "audit_log.py uses a plain Python list (_LOGS) as its backing store. "
+                "All authentication events are wiped on every server restart. "
+                "This violates audit trail requirements for defence/industrial systems."
+            ),
+            recommendation=(
+                "Persist audit logs to the SQLite database or a dedicated append-only log file. "
+                "An AuditLog SQLAlchemy model has been created — wire it into add_log()."
+            ),
+            affected_asset="backend/app/models/audit_log.py",
+            evidence="Variable _LOGS: list[AuditLog] = [] — no DB write in add_log().",
+        ))
     return findings
 
 
 def _check_refresh_token_store() -> list[Finding]:
     """VAPT-010 — Revoked JTI set is in-memory."""
     findings = []
-    findings.append(Finding(
-        id="VAPT-010",
-        category="Session Management",
-        title="Revoked JWT refresh-token set is in-memory — lost on restart",
-        severity="HIGH",
-        description=(
-            "auth.py stores revoked_jtis in a Python set(). If the server restarts, "
-            "all previously revoked refresh tokens become valid again — users who logged out "
-            "can have their old tokens replayed."
-        ),
-        recommendation=(
-            "Persist revoked JTIs to the SQLite database with a TTL equal to the refresh token lifetime (7 days). "
-            "A cron or startup task should prune expired entries."
-        ),
-        affected_asset="backend/app/api/auth.py → revoked_jtis",
-        evidence="revoked_jtis: set[str] = set()  — module-level in-memory set.",
-    ))
+    auth_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "app", "api", "auth.py"))
+    try:
+        with open(auth_path) as fh:
+            src = fh.read()
+        is_persistent = "revoked_jtis: set" not in src and "RevokedToken" in src
+    except Exception:
+        is_persistent = False
+
+    if not is_persistent:
+        findings.append(Finding(
+            id="VAPT-010",
+            category="Session Management",
+            title="Revoked JWT refresh-token set is in-memory — lost on restart",
+            severity="HIGH",
+            description=(
+                "auth.py stores revoked_jtis in a Python set(). If the server restarts, "
+                "all previously revoked refresh tokens become valid again — users who logged out "
+                "can have their old tokens replayed."
+            ),
+            recommendation=(
+                "Persist revoked JTIs to the SQLite database with a TTL equal to the refresh token lifetime (7 days). "
+                "A cron or startup task should prune expired entries."
+            ),
+            affected_asset="backend/app/api/auth.py → revoked_jtis",
+            evidence="revoked_jtis: set[str] = set()  — module-level in-memory set.",
+        ))
     return findings
 
 

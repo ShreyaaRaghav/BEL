@@ -9,7 +9,34 @@ from app.models.audit_log import add_log, get_logs
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-revoked_jtis: set[str] = set()
+from database.db import SessionLocal
+from database.models import RevokedToken
+
+def is_jti_revoked(jti: str) -> bool:
+    if not jti:
+        return False
+    db = SessionLocal()
+    try:
+        return db.query(RevokedToken).filter(RevokedToken.jti == jti).first() is not None
+    finally:
+        db.close()
+
+def revoke_jti(jti: str, expires_at_epoch: float):
+    if not jti:
+        return
+    db = SessionLocal()
+    try:
+        exists = db.query(RevokedToken).filter(RevokedToken.jti == jti).first()
+        if not exists:
+            expires_at = datetime.fromtimestamp(expires_at_epoch, tz=timezone.utc).replace(tzinfo=None)
+            token = RevokedToken(jti=jti, expires_at=expires_at)
+            db.add(token)
+            db.commit()
+    except Exception as e:
+        print(f"Error revoking token: {e}")
+        db.rollback()
+    finally:
+        db.close()
 # Valid bcrypt hash used for constant-time verification when username is missing.
 DUMMY_HASH = hash_password("BelDummyAuth@2026!")
 
@@ -83,14 +110,14 @@ def refresh(body: RefreshRequest):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
 
     jti = payload.get("jti", "")
-    if jti in revoked_jtis:
+    if is_jti_revoked(jti):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token already used")
 
     user = get_user(payload["sub"])
     if not user or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
-    revoked_jtis.add(jti)
+    revoke_jti(jti, payload.get("exp", 0))
 
     return {
         "access_token": create_access_token(user.username, user.role),
@@ -104,7 +131,7 @@ def refresh(body: RefreshRequest):
 def logout(body: RefreshRequest):
     payload = decode_token(body.refresh_token, expected_type="refresh")
     if payload:
-        revoked_jtis.add(payload.get("jti", ""))
+        revoke_jti(payload.get("jti", ""), payload.get("exp", 0))
 
 
 @router.get("/me")
