@@ -4,6 +4,7 @@ import UploadPDF from "./components/UploadPDF";
 import AuditLogs from "./components/AuditLogs";
 import ReportsHistory from "./components/ReportsHistory";
 import Dashboard from "./components/Dashboard";
+import VaptDashboard from "./components/VaptDashboard";
 import { logout, tryRestoreSession } from "./auth";
 
 //rbac HAPPENS HERE
@@ -133,6 +134,18 @@ export default function App() {
                 Audit Logs
               </button>
             )}
+            {user.role === "admin" && (
+              <button onClick={() => setPage("vapt")}
+                style={{
+                  background: page === "vapt" ? "hsla(350, 70%, 20%, 0.6)" : "transparent",
+                  border: "1px solid " + (page === "vapt" ? "hsl(350, 60%, 40%)" : "transparent"),
+                  color: page === "vapt" ? "hsl(350, 85%, 75%)" : "var(--text-secondary)",
+                  padding: "6px 16px", borderRadius: 8, cursor: "pointer", fontSize: 13.5, fontWeight: 600,
+                  transition: "all 0.2s ease"
+                }}>
+                Security (VAPT)
+              </button>
+            )}
           </div>
         </div>
 
@@ -188,6 +201,7 @@ export default function App() {
         {page === "home"    && <UploadPDF userRole={user.role} activeChecksheet={activeChecksheet} setActiveChecksheet={setActiveChecksheet} />}
         {page === "history" && <ReportsHistory />}
         {page === "audit"   && user.role === "admin" && <AuditLogs />}
+        {page === "vapt"    && user.role === "admin" && <VaptDashboard />}
       </div>
     </div>
   );

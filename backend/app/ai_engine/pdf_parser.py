@@ -329,11 +329,12 @@ def extract_title(text):
     return text.strip(" :-")
 
 
-def parse_pdf(file_path):
-    from app.services.pdf_service import extract_text_from_pdf
+def parse_text(raw_text: str):
+    """Parse checksheet-like raw text (string) and return extracted fields.
+    This shares the same logic as the PDF fallback parser but operates on a text blob.
+    """
     from app.ai_engine.ai_parser import parse_with_ai
 
-    raw_text = extract_text_from_pdf(file_path)
     if not raw_text:
         return []
 
@@ -367,3 +368,14 @@ def parse_pdf(file_path):
         })
 
     return fields
+
+
+def parse_pdf(file_path):
+    from app.services.pdf_service import extract_text_from_pdf
+
+    raw_text = extract_text_from_pdf(file_path)
+    if not raw_text:
+        return []
+
+    # Delegate to text parser (AI-first, fallback to rule-based)
+    return parse_text(raw_text)
