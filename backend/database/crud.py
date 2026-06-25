@@ -29,12 +29,20 @@ def save_inspection(db: Session, session_data: dict, results_data: list) -> Insp
         status = r.get("status")
         if not status or status == "PENDING":
             # Map database model properties to the format expected by the evaluator
+            # range_type: keep "visual" as-is so evaluator detects categorical correctly
             field_dict = {
                 "type": "categorical" if check_item.range_type == "visual" else "numeric",
-                "range_type": "range" if check_item.range_type == "between" else check_item.range_type,
+                "range_type": (
+                    "range" if check_item.range_type == "between"
+                    else check_item.range_type  # passes "visual", "min_only", "max_only", etc.
+                ),
                 "min": check_item.range_min,
                 "max": check_item.range_max,
-                "conditions": [c.strip() for c in check_item.range_standard.split("/")] if check_item.range_standard and check_item.range_type == "visual" else None
+                "conditions": (
+                    [c.strip() for c in check_item.range_standard.split("/")]
+                    if check_item.range_standard and check_item.range_type == "visual"
+                    else None
+                ),
             }
             status = evaluate_pass_fail(field_dict, measured_val)
 

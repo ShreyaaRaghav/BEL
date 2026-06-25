@@ -72,9 +72,11 @@ def verify_and_parse_sensor_content(content_str: str) -> tuple[str, dict]:
         
     if not provided_checksum:
         raise HTTPException(status_code=400, detail="Missing checksum. Sensor reader file integrity cannot be verified.")
-        
+
+    # Reproduce exactly what sensor_reader.py does:
+    # "\n".join(data_lines).strip()  — data_lines already have each line stripped
     recomputed_content = "\n".join(data_lines).strip()
-    calculated_checksum = hashlib.sha256(recomputed_content.encode('utf-8')).hexdigest().lower()
+    calculated_checksum = hashlib.sha256(recomputed_content.encode("utf-8")).hexdigest().lower()
     
     if calculated_checksum != provided_checksum:
         raise HTTPException(status_code=400, detail="Integrity violation: Checksum verification failed. The file may have been altered.")
@@ -155,7 +157,7 @@ async def parse_sensor_file(
                 parsed_val = val
                 break
                 
-        values_map[item.id] = parsed_val
+        values_map[str(item.id)] = parsed_val
         is_categorical = item.range_type == "visual"
         
         returned_fields.append({

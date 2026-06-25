@@ -29,13 +29,6 @@ async def _validate_upload(file: UploadFile) -> bytes:
         raise HTTPException(status_code=415, detail="File content does not match PDF format (magic byte check failed).")
     return content
 
-@router.post("/upload/file")
-def upload_file(
-    user: User = Depends(require_role("engineer"))
-):
-    """Upload a file — engineer/admin only."""
-    raise HTTPException(status_code=501, detail="File upload not yet implemented")
-
 @router.post("/upload-pdf")
 async def upload_pdf(
     file: UploadFile = File(...),
@@ -46,8 +39,10 @@ async def upload_pdf(
     # 1. Validate and read PDF content
     content = await _validate_upload(file)
     
-    # 2. Save file with sanitized filename
-    UPLOAD_DIR = os.path.join("uploads")
+    # 2. Save file anchored to project root uploads/ dir
+    _THIS_DIR = os.path.dirname(os.path.abspath(__file__))          # backend/app/api/
+    _PROJECT_ROOT = os.path.abspath(os.path.join(_THIS_DIR, "..", "..", ".."))  # BEL/
+    UPLOAD_DIR = os.path.join(_PROJECT_ROOT, "uploads")
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     
     safe_name = re.sub(r"[^a-zA-Z0-9._-]", "_", os.path.basename(file.filename or "upload.pdf"))

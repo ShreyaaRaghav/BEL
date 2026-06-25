@@ -1,0 +1,24 @@
+# BEL Sensor Reader Telemetry Data
+# Template: Comprehensive 20-Point Vehicle Inspection
+# Timestamp: 2026-06-25T10:30:00.000000
+01 | Engine Oil Level & Condition | MIN-MAX Line / Clean |
+02 | Engine Coolant Freeze Point | -31.0 | C
+03 | Battery Cold Cranking Amps (CCA) | 91.5 | CCA
+04 | Alternator Charging Voltage | 14.2 | V
+05 | Brake Fluid Moisture Content | 1.4 | %
+06 | Front Brake Pad Thickness | 6.8 | mm
+07 | Rear Brake Pad Thickness | 5.2 | mm
+08 | Tyre Tread Depth (Front Left) | 4.1 | mm
+09 | Tyre Tread Depth (Front Right) | 4.3 | mm
+10 | Tyre Tread Depth (Rear Left) | 3.8 | mm
+11 | Tyre Tread Depth (Rear Right) | 3.9 | mm
+12 | Tyre Pressure (Cold - Front) | 33.5 | PSI
+13 | Tyre Pressure (Cold - Rear) | 34.0 | PSI
+14 | Serpentine Drive Belt Tension | No Cracks / Firm |
+15 | Steering Play / Backlash | 7.5 | mm
+16 | Suspension Shock Absorber Leaks | Visual: Dry / Sealed |
+17 | Exhaust Emissions Backpressure | 0.85 | PSI
+18 | A/C Vent Lowest Temp Output | 6.2 | C
+19 | Windscreen Wiper Blade Condition | Streak-free / Intact |
+20 | OBD-II Fault Codes Scan | Zero Active DTCs |
+CHECKSUM: 9018d0365922ee7d267a61921915f54066ded2776cff51abd778f2c4db4bb454

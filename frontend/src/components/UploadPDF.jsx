@@ -80,14 +80,21 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
         throw new Error(result.error);
       }
       
-      // Initialize inputs with parsed values if available
+      // Normalise values_map keys to strings (JSON always produces string keys,
+      // but coerce explicitly to guard against any int/string mismatch)
+      const valuesMap = {};
+      if (result.values) {
+        Object.entries(result.values).forEach(([k, v]) => {
+          valuesMap[String(k)] = v;
+        });
+      }
+
       const initialValues = {};
       const initialNotes = {};
       result.fields.forEach((field) => {
-        initialValues[field.check_item_id] = (result.values && result.values[field.check_item_id] !== undefined)
-          ? result.values[field.check_item_id]
-          : "";
-        initialNotes[field.check_item_id] = "";
+        const key = String(field.check_item_id);
+        initialValues[key] = valuesMap[key] !== undefined ? valuesMap[key] : "";
+        initialNotes[key] = "";
       });
 
       const initialMeta = {
@@ -123,7 +130,7 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
       ...prev,
       values: {
         ...(prev?.values || {}),
-        [checkItemId]: val,
+        [String(checkItemId)]: val,
       }
     }));
     setSavedStatus(null);
@@ -134,7 +141,7 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
       ...prev,
       notes: {
         ...(prev?.notes || {}),
-        [checkItemId]: val,
+        [String(checkItemId)]: val,
       }
     }));
   };
@@ -161,7 +168,7 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
       field.type === "categorical");
 
   const getFieldStatus = (field) => {
-    const rawVal = values[field.check_item_id];
+    const rawVal = values[String(field.check_item_id)];
     if (rawVal === undefined || rawVal === "") {
       return "PENDING";
     }
@@ -236,7 +243,7 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
 
     // Format results list according to DB Schema
     const results = data.fields.map(field => {
-      const rawVal = values[field.check_item_id];
+      const rawVal = values[String(field.check_item_id)];
       const parsedFloat = parseFloat(rawVal);
       return {
         check_item_id: field.check_item_id,
@@ -611,7 +618,7 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
                       step="any"
                       placeholder={textField ? "Observation text" : "Value"}
                       className="field-input"
-                      value={values[field.check_item_id] || ""}
+                      value={values[String(field.check_item_id)] || ""}
                       onChange={(e) => handleInputChange(field.check_item_id, e.target.value)}
                       style={{ fontSize: "0.9rem", padding: "8px 12px" }}
                     />
@@ -624,7 +631,7 @@ export default function UploadPDF({ userRole, activeChecksheet, setActiveChecksh
                       type="text"
                       placeholder="Add compliance notes..."
                       className="field-input"
-                      value={notes[field.check_item_id] || ""}
+                      value={notes[String(field.check_item_id)] || ""}
                       onChange={(e) => handleNoteChange(field.check_item_id, e.target.value)}
                       style={{ fontSize: "0.8rem", padding: "8px 12px", background: "hsla(228, 20%, 8%, 0.4)", borderStyle: "dashed" }}
                     />

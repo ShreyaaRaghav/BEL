@@ -2,9 +2,15 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from app.api import auth, upload, checksheet, sensor_upload
+from app.config import ALLOWED_ORIGINS
+from app.vapt import router as vapt_router
+import database.init_db
+
 
 class SecurityHeadersMiddleware:
     """Injects OWASP-recommended HTTP security headers on every response."""
+
     def __init__(self, app):
         self.app = app
 
@@ -21,7 +27,7 @@ class SecurityHeadersMiddleware:
                     b"x-frame-options": b"DENY",
                     b"x-xss-protection": b"1; mode=block",
                     b"referrer-policy": b"no-referrer",
-                    b"content-security-policy": b"default-src \'self\'",
+                    b"content-security-policy": b"default-src 'self'",
                     b"cache-control": b"no-store",
                     b"permissions-policy": b"geolocation=(), microphone=()",
                 }
@@ -31,12 +37,6 @@ class SecurityHeadersMiddleware:
             await send(message)
 
         await self.app(scope, receive, send_with_headers)
-
-
-from app.api import auth, upload, checksheet, sensor_upload
-from app.config import ALLOWED_ORIGINS
-from app.vapt import router as vapt_router
-import database.init_db
 
 app = FastAPI(title="BEL Secure Checksheet API Portal")
 

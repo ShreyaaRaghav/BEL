@@ -16,8 +16,13 @@ def evaluate_pass_fail(field: dict, value) -> str:
         
     # Check if the field is categorical or has condition rules
     is_categorical = (
-        field.get("type") == "categorical" or 
-        (field.get("conditions") and len(field["conditions"]) > 0 and field.get("range_type") == "unknown")
+        field.get("type") == "categorical"
+        or field.get("range_type") == "visual"
+        or (
+            field.get("conditions")
+            and len(field["conditions"]) > 0
+            and field.get("range_type") in ("unknown", "visual")
+        )
     )
     
     if is_categorical:
