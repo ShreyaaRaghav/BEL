@@ -197,7 +197,8 @@ export default function Dashboard({ userRole, activeChecksheet }) {
     due_soon: overview.due_soon,
     recorrection_rate: overview.recorrection_rate,
     ftr_rate: overview.ftr_rate,
-    avg_mttr_hours: overview.avg_mttr_hours
+    avg_mttr_hours: overview.avg_mttr_hours,
+    avg_processing_mins: overview.avg_processing_mins ?? 0,
   };
   let mergedTrends = trends ? trends.map(t => ({ ...t })) : [];
   let mergedTemplates = templates ? templates.map(t => ({ ...t })) : [];
@@ -656,170 +657,105 @@ export default function Dashboard({ userRole, activeChecksheet }) {
         </div>
       )}
 
-      {/* KPI SUMMARY CARDS */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: "16px" }}>
-        
-        {/* Pass Rate Radial Gauge */}
-        <div style={{ 
-          background: "hsla(228, 20%, 14%, 0.4)", 
-          border: "1px solid var(--card-border)", 
-          borderRadius: "16px", 
-          padding: "16px", 
-          display: "flex", 
-          flexDirection: "column", 
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "150px",
-          position: "relative"
-        }}>
-          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600, marginBottom: "8px" }}>
-            Compliance Rate
-          </span>
+      {/* KPI SUMMARY CARDS — 3 per row, 2 rows */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+
+        {/* Row 1 — Radial gauges */}
+
+        {/* Compliance Rate */}
+        <div style={{ background: "hsla(228, 20%, 14%, 0.4)", border: "1px solid var(--card-border)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "150px" }}>
+          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600, marginBottom: "8px" }}>Compliance Rate</span>
           <div style={{ position: "relative", width: "90px", height: "90px" }}>
             <svg width="90" height="90" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="60" cy="60" r="50" fill="transparent" stroke="hsla(228, 20%, 25%, 0.3)" strokeWidth="10" />
-              <circle 
-                cx="60" 
-                cy="60" 
-                r="50" 
-                fill="transparent" 
-                stroke={mergedOverview.pass_rate >= 80 ? "var(--status-pass-border)" : "var(--status-fail-border)"} 
-                strokeWidth="10" 
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                style={{ transition: "stroke-dashoffset 0.8s ease" }}
-              />
+              <circle cx="60" cy="60" r="50" fill="transparent"
+                stroke={mergedOverview.pass_rate >= 80 ? "var(--status-pass-border)" : "var(--status-fail-border)"}
+                strokeWidth="10" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.8s ease" }} />
             </svg>
-            <div style={{ 
-              position: "absolute", 
-              top: 0, 
-              left: 0, 
-              width: "100%", 
-              height: "100%", 
-              display: "flex", 
-              flexDirection: "column", 
-              alignItems: "center", 
-              justifyContent: "center" 
-            }}>
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "1.35rem", fontWeight: 700, color: "var(--text-primary)" }}>{mergedOverview.pass_rate}%</span>
               <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Pass Rate</span>
             </div>
           </div>
         </div>
 
-        {/* DA WIDGET: RECORRECTION RATE */}
-        <div style={{ 
-          background: "hsla(228, 20%, 14%, 0.4)", 
-          border: "1px solid var(--card-border)", 
-          borderRadius: "16px", 
-          padding: "16px", 
-          display: "flex", 
-          flexDirection: "column", 
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "150px",
-          position: "relative"
-        }}>
-          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600, marginBottom: "8px" }}>
-            Recovery Rate
-          </span>
+        {/* Recovery Rate */}
+        <div style={{ background: "hsla(228, 20%, 14%, 0.4)", border: "1px solid var(--card-border)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "150px" }}>
+          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600, marginBottom: "8px" }}>Recovery Rate</span>
           <div style={{ position: "relative", width: "90px", height: "90px" }}>
             <svg width="90" height="90" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="60" cy="60" r="50" fill="transparent" stroke="hsla(228, 20%, 25%, 0.3)" strokeWidth="10" />
-              <circle 
-                cx="60" 
-                cy="60" 
-                r="50" 
-                fill="transparent" 
-                stroke="var(--accent-cyan)" 
-                strokeWidth="10" 
-                strokeDasharray={circumference}
-                strokeDashoffset={correctionDashoffset}
-                strokeLinecap="round"
-                style={{ transition: "stroke-dashoffset 0.8s ease" }}
-              />
+              <circle cx="60" cy="60" r="50" fill="transparent"
+                stroke="var(--accent-cyan)" strokeWidth="10"
+                strokeDasharray={circumference} strokeDashoffset={correctionDashoffset}
+                strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.8s ease" }} />
             </svg>
-            <div style={{ 
-              position: "absolute", 
-              top: 0, 
-              left: 0, 
-              width: "100%", 
-              height: "100%", 
-              display: "flex", 
-              flexDirection: "column", 
-              alignItems: "center", 
-              justifyContent: "center" 
-            }}>
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "1.35rem", fontWeight: 700, color: "var(--text-primary)" }}>{mergedOverview.recorrection_rate}%</span>
               <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Recorrected</span>
             </div>
           </div>
         </div>
 
-        {/* DA WIDGET: FIRST-TIME RIGHT */}
-        <div style={{ 
-          background: "hsla(228, 20%, 14%, 0.4)", 
-          border: "1px solid var(--card-border)", 
-          borderRadius: "16px", 
-          padding: "16px", 
-          display: "flex", 
-          flexDirection: "column", 
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "150px",
-          position: "relative"
-        }}>
-          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600, marginBottom: "8px" }}>
-            FTR Rate
-          </span>
+        {/* FTR Rate */}
+        <div style={{ background: "hsla(228, 20%, 14%, 0.4)", border: "1px solid var(--card-border)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "150px" }}>
+          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600, marginBottom: "8px" }}>FTR Rate</span>
           <div style={{ position: "relative", width: "90px", height: "90px" }}>
             <svg width="90" height="90" viewBox="0 0 120 120" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="60" cy="60" r="50" fill="transparent" stroke="hsla(228, 20%, 25%, 0.3)" strokeWidth="10" />
-              <circle 
-                cx="60" 
-                cy="60" 
-                r="50" 
-                fill="transparent" 
-                stroke="var(--status-pass-border)" 
-                strokeWidth="10" 
-                strokeDasharray={circumference}
-                strokeDashoffset={ftrDashoffset}
-                strokeLinecap="round"
-                style={{ transition: "stroke-dashoffset 0.8s ease" }}
-              />
+              <circle cx="60" cy="60" r="50" fill="transparent"
+                stroke="var(--status-pass-border)" strokeWidth="10"
+                strokeDasharray={circumference} strokeDashoffset={ftrDashoffset}
+                strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.8s ease" }} />
             </svg>
-            <div style={{ 
-              position: "absolute", 
-              top: 0, 
-              left: 0, 
-              width: "100%", 
-              height: "100%", 
-              display: "flex", 
-              flexDirection: "column", 
-              alignItems: "center", 
-              justifyContent: "center" 
-            }}>
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: "1.35rem", fontWeight: 700, color: "var(--text-primary)" }}>{mergedOverview.ftr_rate}%</span>
               <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", textTransform: "uppercase" }}>1st Pass</span>
             </div>
           </div>
         </div>
 
-        {/* DA WIDGET: MTTR */}
+        {/* Row 2 — Stat tiles */}
+
+        {/* Mean Correction Time */}
         <div style={kpiCardStyle}>
-          <div style={kpiIconBgStyle("var(--accent-cyan)")}></div>
+          <div style={kpiIconBgStyle("var(--accent-cyan)")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
           <span style={kpiLabelStyle}>Mean Correction Time</span>
-          <span style={kpiValStyle}>{mergedOverview.avg_mttr_hours} hrs</span>
-          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "4px" }}>Average fail-to-pass time</span>
+          <span style={kpiValStyle}>{mergedOverview.avg_mttr_hours} mins</span>
+          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "4px" }}>Avg fail-to-pass time</span>
         </div>
 
-        {/* Total Inspections */}
+        {/* Time Taken to Process */}
         <div style={kpiCardStyle}>
-          <div style={kpiIconBgStyle("#2c7be5")}></div>
+          <div style={kpiIconBgStyle("hsl(45, 90%, 58%)")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
+          <span style={kpiLabelStyle}>Time Taken to Process</span>
+          <span style={{ ...kpiValStyle, color: "hsl(45, 90%, 68%)" }}>
+            {mergedOverview.avg_processing_mins < 60
+              ? `${mergedOverview.avg_processing_mins} min`
+              : `${roundNum(mergedOverview.avg_processing_mins / 60, 1)} hrs`}
+          </span>
+          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "4px" }}>Inspection to submission</span>
+        </div>
+
+        {/* Total Uploads */}
+        <div style={kpiCardStyle}>
+          <div style={kpiIconBgStyle("#2c7be5")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
           <span style={kpiLabelStyle}>Total Uploads</span>
           <span style={kpiValStyle}>{mergedOverview.total_reports}</span>
-          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "4px" }}>Saved inspect reports</span>
+          <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", marginTop: "4px" }}>Saved inspection reports</span>
         </div>
 
       </div>

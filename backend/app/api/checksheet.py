@@ -401,6 +401,37 @@ def get_analytics(
         WHERE next_due_date IS NOT NULL AND next_due_date != ''
     """)).scalar() or 0
 
+    # Average time from inspection_date to submitted_at (processing turnaround in minutes)
+    proc_rows = db.execute(text("""
+        SELECT inspection_date, submitted_at
+        FROM inspection_sessions
+        WHERE inspection_date IS NOT NULL AND inspection_date != ''
+          AND submitted_at IS NOT NULL
+    """)).fetchall()
+
+    proc_deltas = []
+    for row in proc_rows:
+        try:
+            insp_dt = datetime.fromisoformat(str(row[0]).strip())
+        except Exception:
+            try:
+                from datetime import datetime as _dt
+                insp_dt = _dt.strptime(str(row[0]).strip(), "%Y-%m-%d")
+            except Exception:
+                continue
+        try:
+            sub_dt = (
+                row[1] if not isinstance(row[1], str)
+                else datetime.fromisoformat(str(row[1]).strip())
+            )
+        except Exception:
+            continue
+        delta_mins = (sub_dt - insp_dt).total_seconds() / 60.0
+        if 0 <= delta_mins <= 60 * 24 * 7:   # ignore outliers > 1 week
+            proc_deltas.append(delta_mins)
+
+    avg_processing_mins = round(sum(proc_deltas) / len(proc_deltas), 1) if proc_deltas else 0.0
+
     return {
         "overview": {
             "total_reports": total_count,
@@ -410,7 +441,8 @@ def get_analytics(
             "due_soon": due_soon_count,
             "recorrection_rate": recorrection_rate,
             "ftr_rate": ftr_rate,
-            "avg_mttr_hours": avg_mttr
+            "avg_mttr_hours": avg_mttr,
+            "avg_processing_mins": avg_processing_mins,
         },
         "trends": trends,
         "templates": templates,

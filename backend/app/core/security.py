@@ -1,15 +1,15 @@
 import re
 import uuid
+import bcrypt
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from app.config import (
     SECRET_KEY, ALGORITHM, TOKEN_EXPIRE_MINUTES,
     PASSWORD_MIN_LENGTH, PASSWORD_NEEDS_UPPER, PASSWORD_NEEDS_LOWER,
     PASSWORD_NEEDS_DIGIT, PASSWORD_NEEDS_SPECIAL,
 )
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
+_BCRYPT_ROUNDS = 12
 
 
 # ---------- Password ----------
@@ -32,11 +32,13 @@ def validate_password(password: str):
 
 def hash_password(password: str) -> str:
     validate_password(password)
-    return pwd_context.hash(password)
+    password_bytes = password.encode("utf-8")
+    salt = bcrypt.gensalt(rounds=_BCRYPT_ROUNDS)
+    return bcrypt.hashpw(password_bytes, salt).decode("utf-8")
 
 def verify_password(plain: str, hashed: str) -> bool:
     try:
-        return pwd_context.verify(plain, hashed)
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
     except Exception:
         return False
 
